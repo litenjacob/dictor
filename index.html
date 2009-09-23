@@ -7,6 +7,15 @@
 		<script type="text/javascript" src="resources-api.js"></script-->
 		
 		<link rel="stylesheet" type="text/css" href="dictor.css"/>
+		<script type="text/javascript">
+			window.onload = function(){
+				var headID=document.getElementsByTagName("head")[0];
+				var newScript=document.createElement('script');
+				newScript.type='text/javascript';
+				newScript.src='http://localhost/apps/dictor/dib.js';
+				headID.appendChild(newScript);
+			}
+		</script>
 	</head>
 	<body>
 		<h1 rel="hej">Hello</h1>
