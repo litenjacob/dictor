@@ -1,20 +1,26 @@
 
 .flash {
  -webkit-animation-name: flash;
- -webkit-animation-duration: 1s;
- -webkit-animation-iteration-count: 10;
+ -webkit-animation-duration: 0.7s;
+ -webkit-animation-iteration-count: infinite;
  -webkit-animation-direction: alternate;
 }
 
 
 @-webkit-keyframes flash {
  from {
-   text-shadow: 0px 0px 2px #0a0;
+   text-shadow: 0px 0px 1px #22aaff, 0px 0px 1px #22aaff, 0px 0px 1px #22aaff;
  }
 
  to {
-   text-shadow: 0px 0px 0px #0a0;
+   text-shadow: 0px 0px 4px #22aaff, 0px 0px 6px #22aaff, 0px 0px 8px #22aaff;
  }
+}
+
+.dictorTransc {
+	background: #22aaff; /* should be semi-transparent! */
+	-webkit-border-radius: 8px;
+	padding: 8px;
 }
 
 

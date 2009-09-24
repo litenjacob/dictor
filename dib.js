@@ -18,7 +18,7 @@ function init(){
 	var head = document.getElementsByTagName('head')[0];
 	var dictorCSS = document.createElement('style');
 	dictorCSS.type = "text/css";
-	dictorCSS.textContent = '.dictorLink.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #0a0;}';
+	dictorCSS.textContent = '.dictorTransc {position: absolute; display: none;} .dictorLink.visible, .dictorTransc.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff; }';
 	head.appendChild(dictorCSS);
 	
 	// helper method
@@ -55,6 +55,11 @@ function init(){
 	var link = document.createElement('div');
 	link.className = 'dictorLink';
 	body.appendChild(link);
+	
+	// create translation container'// create link container
+	var transc = document.createElement('div');
+	transc.className = 'dictorTransc';
+	body.appendChild(transc);
 	
 	// init semi-global variables
 	var from, to, translated = false, over = false;
@@ -117,8 +122,8 @@ function init(){
 
 		if(isOverElem(e, from.location)){ translate() } 
 		else {
-			if(from && to){ translate(); } 
-			else { console.log('flash from!'); }
+			if(from && to){ removeClass(from, 'flash'); translate(); } 
+			else { addClass(from, 'flash'); }
 		}
 		
 		if (link.isVisible) {
@@ -139,7 +144,30 @@ function init(){
 		// get the string for translation
 		tString = translated.slice(0).map(function(n){ addClass(n, "dictorActive"); return n.textContent }).join(" ");
 		
-		console.log("tString", tString);
+		var i = 0, oldY;
+		do {
+			oldY = findPos(translated[i]).ys;
+			i++;
+		} while(translated[i] && findPos(translated[i]).ys == oldY);
+		
+		var rr = findPos(translated[0])
+		var rs = rr.xs;
+		var re = findPos(translated[--i]).xe;
+		
+		var width = re - rs;
+		
+		transc.textContent = tString;
+		transc.style.width = width + 'px';
+		transc.style.left = (rs - 8) + 'px';
+		addClass(transc, 'visible');
+		transc.style.top = (rr.ys - transc.scrollHeight - 8) + 'px';
+		
+		
+		
+		//var pos = rs + width / 2;
+		
+		//console.log("rr", rs, re);
+		//console.log("tString", tString);
 		
 		// reset variables
 		from = to = false;
