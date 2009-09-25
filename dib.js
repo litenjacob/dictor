@@ -9,6 +9,8 @@
 //TODO: fix structure
 //TODO: make it exitable
 //TODO: make possible to choose language
+//TODO: objectify?
+//TODO: make helpers disappear on touchmove?
 
 //window.onload = init;
 var translation = init();
