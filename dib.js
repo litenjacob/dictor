@@ -6,8 +6,14 @@
 //http://www.google.com/uds/samples/language/branding.html
 //http://code.google.com/intl/sv-SE/apis/ajaxlanguage/documentation/#Examples
 
-window.onload = init;
+//window.onload = init;
 init();
+
+function log(){
+	for(var i = 0; i < arguments.length; i++){
+		console.log(arguments[i]);
+	}
+}
 
 function init(){
 	var before = (new Date()).getTime() / 1000;
@@ -63,7 +69,7 @@ function init(){
 	// need to track *mouse* movements
 	document.ontouchmove = function(e){ // should be addeventlistener
 		if(!link.isVisible){ return false; }
-		if(isOverElem(e.touches[0], link.location)){
+		if(isOverElem(e, link.location)){
 			if(!over){
 				addClass(link, 'hover');
 				over = true;
@@ -109,18 +115,28 @@ function init(){
 		
 	}
 	
-	function touchup(e){		
+	function touchup(e){
 		if(link.isVisible){
-			if(isOverElem(e.touches[0], link.location)){
+			if(isOverElem(e, link.location)){
 				console.log('goto ' + link.url);
 				return false;
 			} 
 		}
-
-		if(isOverElem(e.touches[0], from.location)){ translate() } 
-		else {
-			if(from && to){ removeClass(from, 'flash'); translate(); } 
-			else { addClass(from, 'flash'); }
+		
+		if (from) {
+			console.log("huh");
+			if (isOverElem(e, from.location)) {
+				console.log("ha");
+				translate();
+			} else {
+				if (from && to) {
+					removeClass(from, 'flash');
+					translate();
+				}
+				else {
+					addClass(from, 'flash');
+				}
+			}
 		}
 		
 		if (link.isVisible) {
