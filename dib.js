@@ -18,7 +18,7 @@ function init(){
 	var head = document.getElementsByTagName('head')[0];
 	var dictorCSS = document.createElement('style');
 	dictorCSS.type = "text/css";
-	dictorCSS.textContent = '.dictorTransc {position: absolute; display: none;} .dictorLink.visible, .dictorTransc.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff; }';
+	dictorCSS.textContent = '.dictorTransc {position: absolute; display: none;} .dictorLink.visible, .dictorTransc.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff; 0px 0px 8px #22aaff;}';
 	head.appendChild(dictorCSS);
 	
 	// helper method
@@ -43,7 +43,7 @@ function init(){
 	
 	// get all spans into variable and bind touchevents
 	var spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-		n.onmousedown = touchdown;
+		n.ontouchstart = touchdown;
 		return n;
 	});
 	
@@ -52,17 +52,32 @@ function init(){
 	link.className = 'dictorLink';
 	body.appendChild(link);
 	
+	// create tapswitch container
+	var tapSwitch = document.createElement('div');
+	tapSwitch.className = 'tapSwitch';
+	body.appendChild(tapSwitch);
+	
+		// create tapswitch container
+	var tapExit = document.createElement('div');
+	tapExit.className = 'tapExit';
+	body.appendChild(tapExit);
+	
+	scrollFix(tapSwitch, 'vBottom', 'vRight');
+	scrollFix(tapExit, 'vTop', 'vRight');
+	addClass(tapSwitch, 'animTopLeft');
+	addClass(tapExit, 'animTopLeft');
+	
 	// create translation container'// create link container
 	var transc = document.createElement('div');
 	transc.className = 'dictorTransc';
 	body.appendChild(transc);
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false;
+	var from, to, translated = false, over = false, threshold = 500, multi = false;
 	
 	// need to track *mouse* movements
 	document.ontouchmove = function(e){ // should be addeventlistener
-		if(!link.isVisible){ return false; }
+		if(!link.isVisible){ return true; }
 		if(isOverElem(e, link.location)){
 			if(!over){
 				addClass(link, 'hover');
@@ -83,6 +98,7 @@ function init(){
 	}
 	
 	function touchdown(e){
+		
 		if(translated){ // old translation? if so - clear its style
 			removeClass(transc, 'visible');
 			translated.map(function(n){ removeClass(n, 'dictorActive'); return false; });
@@ -90,8 +106,37 @@ function init(){
 		}
 		if(!from){ // have we already touched down once?
 			from = this;
-			from.location = findPos(from);
-		} else { to = this; }
+			from.stamp = new Date().getTime();
+		} else { 
+			if(this == from && (new Date().getTime() - from.stamp) < threshold){ // did we touch from again in time?
+				if (!multi) {
+					e.preventDefault();
+					translate();
+				} else {
+					addClass(from, 'flash');
+				}
+			} else{
+				if(!multi){
+					from = this;
+					from.stamp = new Date().getTime();
+				}
+			}
+			
+			/*else {
+				if (multi) {
+					if (!to) {
+						to = this;
+						to.stamp = new Date().getTime();
+					}
+					else {
+						if (this == to && (new Date().getTime() - to.stamp) < threshold) {
+							e.preventDefault();
+							translate();
+						}
+					}
+				}
+			}*/
+		}
 		
 		// if we're touching a link, show linkhelper to make it 'clickable'
 		if (this.parentNode.nodeName == 'A') {
@@ -110,7 +155,7 @@ function init(){
 	}
 	
 	function touchup(e){
-		if(link.isVisible){
+		/*if(link.isVisible){
 			if(isOverElem(e, link.location)){
 				console.log('goto ' + link.url);
 				return false;
@@ -118,7 +163,6 @@ function init(){
 		}
 		
 		if (from) {
-			console.log("huh");
 			if (isOverElem(e, from.location)) {
 				console.log("ha");
 				translate();
@@ -136,10 +180,11 @@ function init(){
 		if (link.isVisible) {
 			link.isVisible = false;
 			removeClass(link, 'visible');
-		}
+		}*/
 	}
 	
-	function translate(){
+	function translate(e){
+		removeClass(from, 'flash');
 		to = to || from;
 		// what indexes did we tap?
 		var fromClick = spans.indexOf(from);
@@ -180,6 +225,20 @@ function init(){
 		from = to = false;
 	}
 	
+	function scrollFix(elem, v, h){
+		var width = height = ( window.innerHeight * ( 40 / 373 ) );	
+		var fromTop = 0, fromLeft = 0;
+		if(v == 'vBottom') { fromTop = window.innerHeight - height  + 1}
+		if(h == 'vRight') { fromLeft = window.innerWidth - width + 1 }
+		var height = ( window.innerHeight * ( 40 / 373 ) );	
+		elem.style.top = (window.pageYOffset + fromTop) + 'px';
+		elem.style.left = ( window.pageXOffset + fromLeft) + 'px';
+		elem.style.width = width + 'px'; 
+		elem.style.height = height + 'px';
+		elem.style.fontSize = (height * 0.33) + 'px';
+	}
+	
+	document.addEventListener("scroll",  function(){ scrollFix(tapSwitch, 'vBottom', 'vRight'); scrollFix(tapExit, 'vTop', 'vRight'); }, false);
 	
 	var after = (new Date()).getTime() / 1000;
 	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");

@@ -13,7 +13,8 @@
  }
 
  to {
-   text-shadow: 0px 0px 4px #22aaff, 0px 0px 6px #22aaff, 0px 0px 8px #22aaff;
+   /*text-shadow: 0px 0px 4px #22aaff, 0px 0px 8px #22aaff, 0px 0px 10px #22aaff;*/
+   text-shadow: 0px 0px 4px #f00, 0px 0px 8px #f00, 0px 0px 10px #f00;
  }
 }
 
@@ -23,5 +24,20 @@
 	padding: 8px;
 }
 
+.tapSwitch {
+	position: absolute;
+	background: #22aaff;
+	-webkit-border-top-left-radius: 20px;
+}
 
+.tapExit {
+	position: absolute;
+	background: #22aaff;
+	-webkit-border-bottom-left-radius: 20px;
+}
+
+.animTopLeft {
+  -webkit-transition-property: top, left, width, height;
+  -webkit-transition-duration: 0.4s;
+}
 
