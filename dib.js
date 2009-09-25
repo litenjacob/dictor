@@ -9,12 +9,6 @@
 //window.onload = init;
 init();
 
-function log(){
-	for(var i = 0; i < arguments.length; i++){
-		console.log(arguments[i]);
-	}
-}
-
 function init(){
 	var before = (new Date()).getTime() / 1000;
 	var body = document.getElementsByTagName('body')[0];
