@@ -26,8 +26,9 @@
 
 .tapSwitch {
 	position: absolute;
-	background: #22aaff;
 	-webkit-border-top-left-radius: 20px;
+	background: #22aaff url(http://79.99.1.153/dictor/pics/word.png) center center no-repeat;
+	-webkit-background-size: 80%;
 }
 
 .tapExit {
@@ -50,5 +51,5 @@
 }
 
 .multi {
-	background: red !important;
+	background: #22aaff url(http://79.99.1.153/dictor/pics/text.png) center center no-repeat;
 }

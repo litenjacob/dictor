@@ -6,8 +6,12 @@
 //http://www.google.com/uds/samples/language/branding.html
 //http://code.google.com/intl/sv-SE/apis/ajaxlanguage/documentation/#Examples
 
+//TODO: fix structure
+//TODO: make it exitable
+//TODO: make possible to choose language
+
 //window.onload = init;
-init();
+var translation = init();
 
 function init(){
 	var before = (new Date()).getTime() / 1000;
@@ -74,7 +78,7 @@ function init(){
 	body.appendChild(transc);
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = false;
+	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr;
 	
 	
 	// are we over a certain prepared element?
@@ -83,7 +87,6 @@ function init(){
 	}
 	
 	function touchdown(e){
-		
 		if(!from){ // this could be a lot prettier
 			from = this;
 			from.stamp = new Date().getTime();
@@ -177,24 +180,22 @@ function init(){
 		// get the string for translation
 		tString = translated.slice(0).map(function(n){ addClass(n, "dictorActive"); return n.textContent }).join(" ");
 		
+		var s=document.createElement('script');
+		s.type='text/javascript';
+		s.src='http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=en|sv&callback=translation&q=' + escape(tString);
+		head.appendChild(s);
+		
 		var i = 0, oldY;
 		do {
 			oldY = findPos(translated[i]).ys;
 			i++;
 		} while(translated[i] && findPos(translated[i]).ys == oldY);
 		
-		var rr = findPos(translated[0])
-		var rs = rr.xs;
+		rr = findPos(translated[0])
+		rs = rr.xs;
 		var re = findPos(translated[--i]).xe;
 		
-		var width = re - rs;
-		
-		transc.textContent = tString;
-		transc.style.width = width + 'px';
-		transc.style.left = (rs - 8) + 'px';
-		addClass(transc, 'visible');
-		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
-		
+		width = re - rs;
 		from = to = false;
 	}
 	
@@ -226,6 +227,16 @@ function init(){
 	var after = (new Date()).getTime() / 1000;
 	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
 	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
+	
+	function translation(t){
+		transc.textContent = t.responseData.translatedText;
+		transc.style.width = width + 'px';
+		transc.style.left = (rs - 8) + 'px';
+		addClass(transc, 'visible');
+		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+	}
+	
+	return translation;
 }
  
 function addClass(elem, newClass){
