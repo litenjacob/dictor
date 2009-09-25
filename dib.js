@@ -35,12 +35,8 @@ function init(){
 	var oldBody = body.innerHTML;
 	addClass(body, "dictorized");
 	body.innerHTML = body.innerHTML.split(/[<>]/).map(function(n, i){
-		if (i % 2) {
-			return "<" + n + ">";
-		}
-		else {
-			return n.replace(/([^\s]+)/gi, '<span class="dictor">$1</span>');
-		}
+		if (i % 2) { return "<" + n + ">"; }
+		else { return n.replace(/([^\s]+)/gi, '<span class="dictor">$1</span>'); }
 	}).join("");
 	
 	var middle = (new Date()).getTime() / 1000;
@@ -65,9 +61,9 @@ function init(){
 	var from, to, translated = false, over = false;
 	
 	// need to track *mouse* movements
-	document.onmousemove = function(e){
+	document.ontouchmove = function(e){ // should be addeventlistener
 		if(!link.isVisible){ return false; }
-		if(isOverElem(e, link.location)){
+		if(isOverElem(e.touches[0], link.location)){
 			if(!over){
 				addClass(link, 'hover');
 				over = true;
@@ -79,15 +75,16 @@ function init(){
 	}
 	
 	// bind touchup. duh
-	document.onmouseup = touchup;
+	document.ontouchend = touchup;
 	
 	// are we over a certain prepared element?
 	function isOverElem(e, location){
-		return e.clientX > location.xs && e.clientX < location.xe && e.clientY > location.ys && e.clientY < location.ye;
+		return e.pageX > location.xs && e.pageX < location.xe && e.pageY > location.ys && e.pageY < location.ye;
 	}
 	
 	function touchdown(e){
 		if(translated){ // old translation? if so - clear its style
+			removeClass(transc, 'visible');
 			translated.map(function(n){ removeClass(n, 'dictorActive'); return false; });
 			translated = false;
 		}
@@ -103,7 +100,7 @@ function init(){
 			link.textContent = "Goto: " + a.textContent;
 			link.url = a.getAttribute('href');
 			link.style.left = p.xs + 'px';
-			link.style.top = (p.ys - this.scrollHeight) + 'px';
+			link.style.top = (p.ys - this.offsetHeight) + 'px';
 			addClass(link, 'visible');
 			link.isVisible = true;
 			link.location = findPos(link);
@@ -114,13 +111,13 @@ function init(){
 	
 	function touchup(e){		
 		if(link.isVisible){
-			if(isOverElem(e, link.location)){
+			if(isOverElem(e.touches[0], link.location)){
 				console.log('goto ' + link.url);
 				return false;
 			} 
 		}
 
-		if(isOverElem(e, from.location)){ translate() } 
+		if(isOverElem(e.touches[0], from.location)){ translate() } 
 		else {
 			if(from && to){ removeClass(from, 'flash'); translate(); } 
 			else { addClass(from, 'flash'); }
@@ -160,7 +157,7 @@ function init(){
 		transc.style.width = width + 'px';
 		transc.style.left = (rs - 8) + 'px';
 		addClass(transc, 'visible');
-		transc.style.top = (rr.ys - transc.scrollHeight - 8) + 'px';
+		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
 		
 		
 		
@@ -197,12 +194,12 @@ function findPos(obj){
         }
         while (obj = obj.offsetParent);
     }
-    
+
     return {
         xs: curleft,
         ys: curtop,
-		xe: curleft + origObj.scrollWidth,
-		ye: curtop + origObj.scrollHeight
+		xe: curleft + origObj.offsetWidth,
+		ye: curtop + origObj.offsetHeight
     };
     
 }
