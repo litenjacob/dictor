@@ -74,24 +74,8 @@ function init(){
 	body.appendChild(transc);
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = true;
+	var from, to, translated = false, over = false, threshold = 500, multi = false;
 	
-	// need to track *mouse* movements
-	/*document.ontouchmove = function(e){ // should be addeventlistener
-		if(!link.isVisible){ return true; }
-		if(isOverElem(e, link.location)){
-			if(!over){
-				addClass(link, 'hover');
-				over = true;
-			}	
-		} else {
-			if(over){ removeClass(link, 'hover'); }
-			over = false;
-		}
-	}*/
-	
-	// bind touchup. duh
-	document.ontouchend = touchup;
 	
 	// are we over a certain prepared element?
 	function isOverElem(e, location){
@@ -180,35 +164,6 @@ function init(){
 		}
 	}
 	
-	function touchup(e){
-		/*if(link.isVisible){
-			if(isOverElem(e, link.location)){
-				console.log('goto ' + link.url);
-				return false;
-			} 
-		}
-		
-		if (from) {
-			if (isOverElem(e, from.location)) {
-				console.log("ha");
-				translate();
-			} else {
-				if (from && to) {
-					removeClass(from, 'flash');
-					translate();
-				}
-				else {
-					addClass(from, 'flash');
-				}
-			}
-		}
-		
-		if (link.isVisible) {
-			link.isVisible = false;
-			removeClass(link, 'visible');
-		}*/
-	}
-	
 	function translate(e){
 		removeClass(from, 'flash');
 		to = to || from;
@@ -240,14 +195,6 @@ function init(){
 		addClass(transc, 'visible');
 		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
 		
-		
-		
-		//var pos = rs + width / 2;
-		
-		//console.log("rr", rs, re);
-		//console.log("tString", tString);
-		
-		// reset variables
 		from = to = false;
 	}
 	
@@ -266,6 +213,16 @@ function init(){
 	
 	document.addEventListener("scroll",  function(){ scrollFix(tapSwitch, 'vBottom', 'vRight'); scrollFix(tapExit, 'vTop', 'vRight'); }, false);
 	
+	tapSwitch.ontouchstart = function(){
+		if(hasClass(tapSwitch, 'multi')){
+			removeClass(tapSwitch, 'multi');
+			multi = false;
+		} else {
+			addClass(tapSwitch, 'multi');
+			multi = true;
+		}
+	}
+	
 	var after = (new Date()).getTime() / 1000;
 	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
 	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
@@ -278,6 +235,10 @@ function addClass(elem, newClass){
 function removeClass(elem, oldClass){
 	elem.className = elem.className.replace(new RegExp("(\\s|^)" + oldClass + "(\\s|$)"), '');
 }  
+
+function hasClass(elem, testClass){
+	return elem.className.match(new RegExp("(\\s|^)" + testClass + "(\\s|$)"))
+}
  
 function findPos(obj){
 	var origObj = obj;
