@@ -41,3 +41,10 @@
   -webkit-transition-duration: 0.4s;
 }
 
+.dictorLink {
+	background: #22aaff;
+	-webkit-border-radius: 6px;
+	color: #fff;
+	padding: 4px;
+	white-space: nowrap;
+}

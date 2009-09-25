@@ -47,8 +47,8 @@ function init(){
 		return n;
 	});
 	
-	// create link container
-	var link = document.createElement('div');
+	// create link
+	var link = document.createElement('a');
 	link.className = 'dictorLink';
 	body.appendChild(link);
 	
@@ -57,11 +57,12 @@ function init(){
 	tapSwitch.className = 'tapSwitch';
 	body.appendChild(tapSwitch);
 	
-		// create tapswitch container
+	// create tapswitch container
 	var tapExit = document.createElement('div');
 	tapExit.className = 'tapExit';
 	body.appendChild(tapExit);
 	
+	// Fix scrolling and anims
 	scrollFix(tapSwitch, 'vBottom', 'vRight');
 	scrollFix(tapExit, 'vTop', 'vRight');
 	addClass(tapSwitch, 'animTopLeft');
@@ -73,10 +74,10 @@ function init(){
 	body.appendChild(transc);
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = false;
+	var from, to, translated = false, over = false, threshold = 500, multi = true;
 	
 	// need to track *mouse* movements
-	document.ontouchmove = function(e){ // should be addeventlistener
+	/*document.ontouchmove = function(e){ // should be addeventlistener
 		if(!link.isVisible){ return true; }
 		if(isOverElem(e, link.location)){
 			if(!over){
@@ -87,7 +88,7 @@ function init(){
 			if(over){ removeClass(link, 'hover'); }
 			over = false;
 		}
-	}
+	}*/
 	
 	// bind touchup. duh
 	document.ontouchend = touchup;
@@ -99,43 +100,53 @@ function init(){
 	
 	function touchdown(e){
 		
-		if(translated){ // old translation? if so - clear its style
-			removeClass(transc, 'visible');
-			translated.map(function(n){ removeClass(n, 'dictorActive'); return false; });
-			translated = false;
-		}
-		if(!from){ // have we already touched down once?
+		if(!from){ // this could be a lot prettier
 			from = this;
 			from.stamp = new Date().getTime();
 		} else { 
 			if(this == from && (new Date().getTime() - from.stamp) < threshold){ // did we touch from again in time?
 				if (!multi) {
 					e.preventDefault();
+					removeTrans();
 					translate();
 				} else {
+					e.preventDefault();
+					removeTrans();
 					addClass(from, 'flash');
+					from.isActive = true;
 				}
 			} else{
 				if(!multi){
 					from = this;
 					from.stamp = new Date().getTime();
-				}
-			}
-			
-			/*else {
-				if (multi) {
-					if (!to) {
-						to = this;
-						to.stamp = new Date().getTime();
+				} else {
+					if (this == from) {
+						removeClass(from, 'flash');
+						from = false;
 					}
 					else {
-						if (this == to && (new Date().getTime() - to.stamp) < threshold) {
-							e.preventDefault();
-							translate();
+						if (from.isActive) {
+							if (!to) {
+								to = this;
+								to.stamp = new Date().getTime();
+							}
+							else {
+								if (this == to && (new Date().getTime() - to.stamp) < threshold) {
+									e.preventDefault();
+									removeTrans();
+									translate();
+								} else {
+									to = this;
+									to.stamp = new Date().getTime();
+								}
+							}
+						} else {
+							from = this;
+							from.stamp = new Date().getTime();
 						}
 					}
 				}
-			}*/
+			}
 		}
 		
 		// if we're touching a link, show linkhelper to make it 'clickable'
@@ -143,15 +154,30 @@ function init(){
 			var p = findPos(this);
 			var a = this.parentNode;
 			link.textContent = "Goto: " + a.textContent;
-			link.url = a.getAttribute('href');
-			link.style.left = p.xs + 'px';
-			link.style.top = (p.ys - this.offsetHeight) + 'px';
+			link.setAttribute('href', a.getAttribute('href'));
+			link.style.left = (p.xs - 4) + 'px';
+			link.style.top = (p.ys - this.offsetHeight - 4) + 'px';
 			addClass(link, 'visible');
 			link.isVisible = true;
 			link.location = findPos(link);
 			return false;
 		}
 		
+		if(link.isVisible){
+			link.isVisible = false;
+			removeClass(link, 'visible');
+		}	
+	}
+	
+	function removeTrans(){
+		if (translated) {
+			removeClass(transc, 'visible');
+			translated.map(function(n){
+				removeClass(n, 'dictorActive');
+				return false;
+			});
+			translated = false;
+		}
 	}
 	
 	function touchup(e){
