@@ -7,13 +7,11 @@
 //http://code.google.com/intl/sv-SE/apis/ajaxlanguage/documentation/#Examples
 
 //TODO: fix structure
-//TODO: make it exitable
-//TODO: make possible to choose language
-//TODO: make it fill in lang of page as from lang
 //TODO: objectify?
+//TODO: branding!
+//TODO: show loader
 
 
-//window.onload = init;
 var dictor = init();
 
 function init(){
@@ -27,12 +25,9 @@ function init(){
 	var body = document.getElementsByTagName('body')[0];
 	if (body.className.match(/dictorized/)) { return false; } // already dictorized?
 	
-	// append css
-	var head = document.getElementsByTagName('head')[0]; // Change to link href
-	/*var dictorCSS = document.createElement('style');
-	dictorCSS.type = "text/css";
-	dictorCSS.textContent = '.dictorTransc {position: absolute; display: none;} .dictorLink.visible, .dictorTransc.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff; 0px 0px 8px #22aaff;}';
-	head.appendChild(dictorCSS);*/
+	var head = document.getElementsByTagName('head')[0];
+	
+	// link in css
 	var css = document.createElement('link');
 	css.setAttribute('rel', 'stylesheet');
 	css.type = "text/css";
@@ -50,8 +45,7 @@ function init(){
 	
 	// init semi-global variables
 	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = dictor.lang || 'en';
-	
-				
+			
 	// magically wraps all words in dictor spans
 	var oldBody = body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
 	addClass(body, "dictorized");
@@ -68,7 +62,7 @@ function init(){
 		return n;
 	});
 	
-	// kill links - not a pretty solution, but seems impossible to catch all link taps :S
+	// kill links - not a pretty solution, but seems impossible to catch all link taps otherwise :S
 	var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
 		n.setAttribute('rel', n.getAttribute('href'));
 		n.setAttribute('href', '#');	

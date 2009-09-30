@@ -1,8 +1,3 @@
-.dictorTransc {
-    position: absolute;
-    display: none;
-}
-
 .dictorLink.visible, .dictorTransc.visible {
     display: block;
 }
@@ -49,6 +44,8 @@ to {
     background: #22aaff; /* should be semi-transparent! */
     -webkit-border-radius: 8px;
     padding: 8px;
+	position: absolute;
+    display: none;
 }
 
 .tapSwitch {
