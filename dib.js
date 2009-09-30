@@ -14,9 +14,11 @@
 
 
 //window.onload = init;
-var translation = init();
+var dictor = init();
 
 function init(){
+	var dictorContext = this;
+	
 	var dictorEvents = {
 		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
 	}
@@ -238,11 +240,7 @@ function init(){
 		// get the string for translation
 		tString = translated.slice(0).map(function(n){ addClass(n, "dictorActive"); return n.textContent }).join(" ");
 		
-		var s=document.createElement('script');
-		s.id = 'JSONP';
-		s.type='text/javascript';
-		s.src='http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=|' + toLangCode + '&callback=translation&q=' + escape(tString);
-		head.appendChild(s);
+		jsonpCall('http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=|' + toLangCode + '&context=translation&callback=dictor.jsonpExec&q=' + escape(tString));
 		
 		var i = 0, oldY;
 		do {
@@ -271,12 +269,32 @@ function init(){
 		elem.style.fontSize = (height * 0.33) + 'px';
 	}
 	
-	function translation(t){
-		transc.textContent = t.responseData.translatedText;
-		/*transc.style.width = width + 'px';*/
-		transc.style.left = (rs - 8) + 'px';
-		addClass(transc, 'visible');
-		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+	function translation(response, status, error){
+		if (status == 200) {
+			transc.textContent = response.translatedText;
+			/*transc.style.width = width + 'px';*/
+			transc.style.left = (rs - 8) + 'px';
+			addClass(transc, 'visible');
+			transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+		}
+	}
+	
+	var after = (new Date()).getTime() / 1000;
+	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
+	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
+	
+	function jsonpCall(src){
+		var s=document.createElement('script');
+		s.id = 'JSONP';
+		s.type='text/javascript';
+		s.src= src;
+		head.appendChild(s);
+	}
+	
+	function jsonpExec(){
+		var args = Array.prototype.slice.call(arguments);
+		var func = args.shift();
+		dictor[func].apply(dictorContext, args);
 		
 		// Remove any old script tags.  // Courtsey of Neil Fraser
 		var script;
@@ -290,10 +308,10 @@ function init(){
 		}
 	}
 	
-	var after = (new Date()).getTime() / 1000;
-	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
-	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
-	return translation;
+	return { // must return all funcs to be remotely executed
+		translation: translation,
+		jsonpExec: jsonpExec
+	};
 }
  
 function addClass(elem, newClass){
