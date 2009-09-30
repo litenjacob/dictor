@@ -9,8 +9,9 @@
 //TODO: fix structure
 //TODO: make it exitable
 //TODO: make possible to choose language
+//TODO: make it fill in lang of page as from lang
 //TODO: objectify?
-//TODO: make helpers disappear on touchmove?
+
 
 //window.onload = init;
 var translation = init();
@@ -21,7 +22,7 @@ function init(){
 	if (body.className.match(/dictorized/)) { return false; } // already dictorized?
 	
 	// append css
-	var head = document.getElementsByTagName('head')[0];
+	var head = document.getElementsByTagName('head')[0]; // Change to link href
 	var dictorCSS = document.createElement('style');
 	dictorCSS.type = "text/css";
 	dictorCSS.textContent = '.dictorTransc {position: absolute; display: none;} .dictorLink.visible, .dictorTransc.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff; 0px 0px 8px #22aaff;}';
@@ -49,59 +50,43 @@ function init(){
 	
 	// get all spans into variable and bind touchevents
 	var spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-		n.ontouchstart = touchdown; //TODO: addEventListener instead
+		//n.ontouchstart = touchdown; //TODO: addEventListener instead
+		n.addEventListener('touchstart', touchdown, false);
 		return n;
 	});
 	
-	// create link
-	var link = document.createElement('a');
-	link.className = 'dictorLink';
-	body.appendChild(link);
+	// kill links - not a pretty solution, but seems impossible to catch all link taps :S
+	var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
+		n.setAttribute('rel', n.getAttribute('href'));
+		n.setAttribute('href', '#');	
+	})
 	
-	//var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
-	/*var corners = [
+	// create link
+	var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
+	
+	var corners = [
 		{className: 'tapHelp', scroll: {v: 't', h: 'l'}, anim: 1},
 		{className: 'tapExit', scroll: {v: 't', h: 'r'}, anim: 1},
-		{className: 'tapSwitch', scroll: {v: 'b', h: 'r'}, anim: 1},
+		{className: 'tapSwitch', scroll: {v: 'b', h: 'r'}, anim: 1, 
+			events: {
+				touchstart: function(e){
+					e.preventDefault();
+					if(hasClass(this, 'multi')){
+						console.log("mf");
+						removeClass(this, 'multi');
+						multi = false;
+					} else {
+						addClass(this, 'multi');
+						multi = true;
+						console.log("mt");
+					}
+				}
+			}
+		},
 		{className: 'tapLang', scroll: {v: 'b', h: 'l'}, anim: 1}	
-	].map(createDictorElem); //TODO: try this*/
+	].map(createDictorElem);
 	
-	/*
-	 TODO: corners[3].chooselang... 
-	 */
-	
-	//TODO: these should be abstracted
-	// create tapswitch container
-	var tapSwitch = document.createElement('div');
-	tapSwitch.className = 'tapSwitch';
-	body.appendChild(tapSwitch);
-	
-	// create tapExit container
-	var tapExit = document.createElement('div');
-	tapExit.className = 'tapExit';
-	body.appendChild(tapExit);
-	
-	// create tapLang container
-	var tapLang = document.createElement('div');
-	tapLang.className = 'tapLang';
-	body.appendChild(tapLang);
-	
-	// create tapHelp container
-	var tapHelp = document.createElement('div');
-	tapHelp.className = 'tapHelp';
-	body.appendChild(tapHelp);
-	
-	// Fix scrolling and anims
-	scrollFix(tapSwitch, 'b', 'r');
-	scrollFix(tapExit, 't', 'r');
-	scrollFix(tapLang, 'b', 'l');
-	scrollFix(tapHelp, 't', 'l');
-	addClass(tapSwitch, 'animTopLeft');
-	addClass(tapExit, 'animTopLeft');
-	addClass(tapLang, 'animTopLeft');
-	addClass(tapHelp, 'animTopLeft');
-	
-	function createDictorElem(opts){ //TODO: bind onTap
+	function createDictorElem(opts){
 		var elem = document.createElement(opts.elemType || 'div');
 		elem.className = opts.className || '';
 		if(opts.append !== false && opts.append !== 0){
@@ -111,30 +96,25 @@ function init(){
 		if(opts.scroll){
 			document.addEventListener("scroll", function(){
 				scrollFix(elem, opts.scroll.v, opts.scroll.h); 
-			});
+			}, false);
 			scrollFix(elem, opts.scroll.v, opts.scroll.h); // Prime-time
 		}
 		if(opts.anim){
 			addClass(elem, 'animTopLeft');
 		}
+		if(opts.events){
+			for(var event in opts.events){
+				elem.addEventListener(event, opts.events[event], false);
+			}
+		}
 		return elem;
 	}
 	
-	// create translation container'// create link container
-	var transc = document.createElement('div');
-	transc.className = 'dictorTransc';
-	body.appendChild(transc);	
-	//var transc = createDictorElem({className: 'dictorTransc'});
+	// create translation container
+	var transc = createDictorElem({className: 'dictorTransc'});
 	
 	// init semi-global variables
 	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr;
-	
-	
-	// are we over a certain prepared element?
-	//TODO: deprecated
-	/*function isOverElem(e, location){
-		return e.pageX > location.xs && e.pageX < location.xe && e.pageY > location.ys && e.pageY < location.ye;
-	}*/
 	
 	function touchdown(e){
 		if(!from){ // this could be a lot prettier
@@ -146,11 +126,13 @@ function init(){
 					e.preventDefault();
 					removeTrans();
 					translate();
+					return false;
 				} else {
 					e.preventDefault();
 					removeTrans();
 					addClass(from, 'flash');
 					from.isActive = true;
+					return false;
 				}
 			} else{
 				if(!multi){
@@ -172,6 +154,7 @@ function init(){
 									e.preventDefault();
 									removeTrans();
 									translate();
+									return false;
 								} else {
 									to = this;
 									to.stamp = new Date().getTime();
@@ -191,7 +174,7 @@ function init(){
 			var p = findPos(this);
 			var a = this.parentNode;
 			link.textContent = "Goto: " + a.textContent;
-			link.setAttribute('href', a.getAttribute('href'));
+			link.setAttribute('href', a.getAttribute('rel'));
 			link.style.left = (p.xs - 4) + 'px';
 			link.style.top = (p.ys - this.offsetHeight - 4) + 'px';
 			addClass(link, 'visible');
@@ -203,7 +186,8 @@ function init(){
 		if(link.isVisible){  //TODO: should this be here?
 			link.isVisible = false;
 			removeClass(link, 'visible');
-		}	
+		}
+		
 	}
 	
 	function removeTrans(){
@@ -231,6 +215,7 @@ function init(){
 		tString = translated.slice(0).map(function(n){ addClass(n, "dictorActive"); return n.textContent }).join(" ");
 		
 		var s=document.createElement('script');
+		s.id = 'JSONP';
 		s.type='text/javascript';
 		s.src='http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=en|sv&callback=translation&q=' + escape(tString);
 		head.appendChild(s);
@@ -262,33 +247,27 @@ function init(){
 		elem.style.fontSize = (height * 0.33) + 'px';
 	}
 	
-	document.addEventListener("scroll",  function(){ // Abstract this
-		scrollFix(tapSwitch, 'b', 'r'); 
-		scrollFix(tapExit, 't', 'r');
-		scrollFix(tapLang, 'b', 'l');
-		scrollFix(tapHelp, 't', 'l'); 
-	}, false);
-	
-	tapSwitch.ontouchstart = function(){ // Possibly addEventListener - profile performance, though
-		if(hasClass(tapSwitch, 'multi')){
-			removeClass(tapSwitch, 'multi');
-			multi = false;
-		} else {
-			addClass(tapSwitch, 'multi');
-			multi = true;
-		}
-	}
-	
 	var after = (new Date()).getTime() / 1000;
 	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
 	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
 	
 	function translation(t){
 		transc.textContent = t.responseData.translatedText;
-		transc.style.width = width + 'px';
+		/*transc.style.width = width + 'px';*/
 		transc.style.left = (rs - 8) + 'px';
 		addClass(transc, 'visible');
 		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+		
+		// Remove any old script tags.  // Courtsey of Neil Fraser
+		var script;
+		while (script = document.getElementById('JSONP')) {
+			script.parentNode.removeChild(script);
+		    // Browsers won't garbage collect this object.
+		    // So castrate it to avoid a major memory leak.
+		    for (var prop in script) {
+		    	delete script[prop];
+		    }
+		}
 	}
 	
 	return translation;
