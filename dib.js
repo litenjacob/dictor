@@ -17,6 +17,10 @@
 var translation = init();
 
 function init(){
+	var dictorEvents = {
+		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
+	}
+	
 	var before = (new Date()).getTime() / 1000;
 	var body = document.getElementsByTagName('body')[0];
 	if (body.className.match(/dictorized/)) { return false; } // already dictorized?
@@ -54,7 +58,7 @@ function init(){
 	
 	// get all spans into variable and bind touchevents - this doesn't seem to be slower than binding using ontouchstart or even adding the ontouchstart on tag creation :) 
 	var spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-		n.addEventListener('touchstart', touchdown, false);
+		n.addEventListener(dictorEvents['touchstart'], touchdown, false);
 		return n;
 	});
 	
@@ -69,19 +73,23 @@ function init(){
 	
 	var corners = [
 		{className: 'tapHelp', scroll: {v: 't', h: 'l'}, anim: 1},
-		{className: 'tapExit', scroll: {v: 't', h: 'r'}, anim: 1},
+		{className: 'tapExit', scroll: {v: 't', h: 'r'}, anim: 1, 
+			events: {
+				touchstart: function(e){
+					body.innerHTML = oldBody;
+				}
+			}
+		},
 		{className: 'tapSwitch', scroll: {v: 'b', h: 'r'}, anim: 1, 
 			events: {
 				touchstart: function(e){
 					e.preventDefault();
 					if(hasClass(this, 'multi')){
-						console.log("mf");
 						removeClass(this, 'multi');
 						multi = false;
 					} else {
 						addClass(this, 'multi');
 						multi = true;
-						console.log("mt");
 					}
 				}
 			}
@@ -123,7 +131,7 @@ function init(){
 		}
 		if(opts.events){
 			for(var event in opts.events){
-				elem.addEventListener(event, opts.events[event], false);
+				elem.addEventListener(dictorEvents[event] || event, opts.events[event], false);
 			}
 		}
 		return elem;
