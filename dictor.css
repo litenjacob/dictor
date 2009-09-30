@@ -65,3 +65,23 @@
 .multi {
 	background: #22aaff url(http://79.99.1.153/dictor/pics/text.png) center center no-repeat;
 }
+
+.langPicker select {
+	width: 40px;
+	height: 40px;
+	opacity: 0;
+	position: absolute;
+}
+
+.langPicker {
+	position: relative;
+	width: 40px;
+}
+
+.langShow {
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	line-height: 40px;
+}

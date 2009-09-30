@@ -37,9 +37,13 @@ function init(){
 	    })
 	    return arr;
 	}
+	
+	// init semi-global variables
+	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = dictor.lang || 'en';
+	
 				
 	// magically wraps all words in dictor spans
-	var oldBody = body.innerHTML;
+	var oldBody = body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
 	addClass(body, "dictorized");
 	body.innerHTML = body.innerHTML.split(/[<>]/).map(function(n, i){
 		if (i % 2) { return "<" + n + ">"; }
@@ -48,9 +52,8 @@ function init(){
 	
 	var middle = (new Date()).getTime() / 1000;
 	
-	// get all spans into variable and bind touchevents
+	// get all spans into variable and bind touchevents - this doesn't seem to be slower than binding using ontouchstart or even adding the ontouchstart on tag creation :) 
 	var spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-		//n.ontouchstart = touchdown; //TODO: addEventListener instead
 		n.addEventListener('touchstart', touchdown, false);
 		return n;
 	});
@@ -86,6 +89,22 @@ function init(){
 		{className: 'tapLang', scroll: {v: 'b', h: 'l'}, anim: 1}	
 	].map(createDictorElem);
 	
+	// language picker
+	var langs = '<select id="langSelect"><option value="ar">العربية</option><option value="bg">български</option><option value="ca">català</option><option value="cs">česky</option><option value="da">Dansk</option><option value="de">Deutsch</option><option value="el">Ελληνικά</option><option value="en">English</option><option value="es">Español</option><option value="fi">suomi</option><option value="fr">Français</option><option value="hi">हिन्दी</option><option value="hr">hrvatski</option><option value="id">Indonesia</option><option value="it">Italiano</option><option value="iw">עברית</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="lt">Lietuvių</option><option value="lv">latviešu</option><option value="nl">Nederlands</option><option value="no">norsk</option><option value="pl">Polski</option><option value="pt">Português</option><option value="ro">Română</option><option value="ru">Русский</option><option value="sk">slovenčina</option><option value="sl">slovenščina</option><option value="sr">српски</option><option value="sv">svenska</option><option value="tl">Filipino</option><option value="uk">українська</option><option value="vi">Tiếng Việt</option><option id="opsvzh-CN" value="zh-CN">中文 (简体)</option><option id="opsvzh-TW" value="zh-TW">中文 (繁體)</option></select>';
+	corners[3].innerHTML = '<span id="toLangContainer" class="langPicker"><span id="toLang" class="langShow">sv</span>' + langs + '</span>';
+	var langSelect = document.getElementById('langSelect');
+	var toLangLabel = document.getElementById('toLang');
+	langSelect.addEventListener('change', function(){
+		toLangLabel.textContent = toLangCode = this.value;
+	}, false);
+	
+	for(var i = 0; i < langSelect.options.length; i++){
+		if(langSelect.options[i].value == toLangCode){
+			langSelect.options[i].selected = true;
+			toLangLabel.textContent = toLangCode;
+		}
+	}
+	
 	function createDictorElem(opts){
 		var elem = document.createElement(opts.elemType || 'div');
 		elem.className = opts.className || '';
@@ -113,11 +132,8 @@ function init(){
 	// create translation container
 	var transc = createDictorElem({className: 'dictorTransc'});
 	
-	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr;
-	
-	function touchdown(e){
-		if(!from){ // this could be a lot prettier
+	function touchdown(e){  // this could probably be a lot prettier
+		if(!from){ 
 			from = this;
 			from.stamp = new Date().getTime();
 		} else { 
@@ -217,7 +233,7 @@ function init(){
 		var s=document.createElement('script');
 		s.id = 'JSONP';
 		s.type='text/javascript';
-		s.src='http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=en|sv&callback=translation&q=' + escape(tString);
+		s.src='http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=|' + toLangCode + '&callback=translation&q=' + escape(tString);
 		head.appendChild(s);
 		
 		var i = 0, oldY;
@@ -247,10 +263,6 @@ function init(){
 		elem.style.fontSize = (height * 0.33) + 'px';
 	}
 	
-	var after = (new Date()).getTime() / 1000;
-	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
-	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
-	
 	function translation(t){
 		transc.textContent = t.responseData.translatedText;
 		/*transc.style.width = width + 'px';*/
@@ -270,6 +282,9 @@ function init(){
 		}
 	}
 	
+	var after = (new Date()).getTime() / 1000;
+	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
+	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
 	return translation;
 }
  
