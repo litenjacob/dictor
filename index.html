@@ -11,13 +11,12 @@
 		<script type="text/javascript">
 			window.onload = function(){
 				dictor = {lang: 'sv'};
-				var headID=document.getElementsByTagName("head")[0];
-				var newScript=document.createElement('script');
-				newScript.type='text/javascript';
-				newScript.charset = 'utf-8';
-				newScript.src='http://79.99.1.153/dictor/dib.js?' + (new Date()).getTime();
-				//newScript.src='http://localhost/apps/dictor/dib.js?' + (new Date()).getTime();
-				headID.appendChild(newScript);
+				var h=document.getElementsByTagName("head")[0];
+				var s=document.createElement('script');
+				s.type='text/javascript';
+				s.charset = 'utf-8';
+				s.src='http://79.99.1.153/dictor/dib.js?' + (new Date()).getTime();
+				h.appendChild(s);
 			}
 		</script>
 	</head>

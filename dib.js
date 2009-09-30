@@ -32,6 +32,7 @@ function init(){
 	css.setAttribute('rel', 'stylesheet');
 	css.type = "text/css";
 	css.setAttribute('href', 'http://79.99.1.153/dictor/dictor.css');
+	head.appendChild(css);
 	
 	// helper method
 	Array.prototype.map = function(fn){
@@ -44,7 +45,7 @@ function init(){
 	}
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = dictor.lang || 'en';
+	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = (dictor != undefined ? dictor.lang : null) || 'en', timer, panelsIsVisible = true;	
 			
 	// magically wraps all words in dictor spans
 	var oldBody = body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
@@ -72,15 +73,15 @@ function init(){
 	var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
 	
 	var corners = [
-		{className: 'tapHelp', scroll: {v: 't', h: 'l'}, anim: 1},
-		{className: 'tapExit', scroll: {v: 't', h: 'r'}, anim: 1, 
+		{className: 'tapHelp tappables', scroll: {v: 't', h: 'l'}, anim: 1, content: {text: '?'}},
+		{className: 'tapExit tappables', scroll: {v: 't', h: 'r'}, anim: 1, content: {text: 'x'},
 			events: {
 				touchstart: function(e){
 					body.innerHTML = oldBody;
 				}
 			}
 		},
-		{className: 'tapSwitch', scroll: {v: 'b', h: 'r'}, anim: 1, 
+		{className: 'tapSwitch tappables', scroll: {v: 'b', h: 'r'}, anim: 1, 
 			events: {
 				touchstart: function(e){
 					e.preventDefault();
@@ -94,7 +95,7 @@ function init(){
 				}
 			}
 		},
-		{className: 'tapLang', scroll: {v: 'b', h: 'l'}, anim: 1}	
+		{className: 'tapLang tappables', scroll: {v: 'b', h: 'l'}, anim: 1}	
 	].map(createDictorElem);
 	
 	// language picker
@@ -127,11 +128,18 @@ function init(){
 			scrollFix(elem, opts.scroll.v, opts.scroll.h); // Prime-time
 		}
 		if(opts.anim){
-			addClass(elem, 'animTopLeft');
+			//addClass(elem, 'animTopLeft');
 		}
 		if(opts.events){
 			for(var event in opts.events){
 				elem.addEventListener(dictorEvents[event] || event, opts.events[event], false);
+			}
+		}
+		if(opts.content){
+			if(opts.content.text){
+				elem.textContent = opts.content.text;
+			} else if(opts.content.html){
+				elem.innerHTML = opts.content.html;
 			}
 		}
 		return elem;
@@ -214,6 +222,19 @@ function init(){
 		
 	}
 	
+	// touchmove hides panels
+	document.addEventListener('touchmove', function(){
+		if (panelsIsVisible) {
+			addClass(body, 'dictorHide');
+			panelsIsVisible = false;
+		}
+	}, false)
+	
+	document.addEventListener("scroll", function(){
+		removeClass(body, 'dictorHide');
+		panelsIsVisible = true;
+	}, false)
+	
 	function removeTrans(){
 		if (translated) {
 			removeClass(transc, 'visible');
@@ -227,6 +248,7 @@ function init(){
 	
 	function translate(e){
 		removeClass(from, 'flash');
+		
 		to = to || from;
 		// what indexes did we tap?
 		var fromClick = spans.indexOf(from);
@@ -252,6 +274,15 @@ function init(){
 		
 		width = re - rs;
 		from = to = false;
+		
+		// show loader
+		transc.innerHTML = '<img src="http://79.99.1.153/dictor/pics/ajax-loader.gif" alt="loader"/>';
+		addClass(transc, 'visible');
+		timer = setTimeout(function(){
+			transc.textContent = 'error';
+		}, 12000);
+		transc.style.left = (rs - 8) + 'px';
+		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
 	}
 	
 	function scrollFix(elem, v, h){
@@ -269,11 +300,10 @@ function init(){
 	
 	function translation(response, status, error){
 		if (status == 200) {
+			clearTimeout(timer);
 			transc.textContent = response.translatedText;
 			/*transc.style.width = width + 'px';*/
-			transc.style.left = (rs - 8) + 'px';
-			addClass(transc, 'visible');
-			transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+			
 		}
 	}
 	
@@ -341,7 +371,8 @@ function init(){
 	
 	return { // must return all funcs to be remotely executed
 		translation: translation,
-		jsonpExec: jsonpExec
+		jsonpExec: jsonpExec,
+		spans: spans
 	};
 }
  
