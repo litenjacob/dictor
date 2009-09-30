@@ -29,10 +29,14 @@ function init(){
 	
 	// append css
 	var head = document.getElementsByTagName('head')[0]; // Change to link href
-	var dictorCSS = document.createElement('style');
+	/*var dictorCSS = document.createElement('style');
 	dictorCSS.type = "text/css";
 	dictorCSS.textContent = '.dictorTransc {position: absolute; display: none;} .dictorLink.visible, .dictorTransc.visible {display: block;} .dictorLink.hover { color: #f00;} .dictorLink {position:absolute; display:none;} .dictor {cursor:pointer;margin:0;padding:0;} .dictorActive {text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff; 0px 0px 8px #22aaff;}';
-	head.appendChild(dictorCSS);
+	head.appendChild(dictorCSS);*/
+	var css = document.createElement('link');
+	css.setAttribute('rel', 'stylesheet');
+	css.type = "text/css";
+	css.setAttribute('href', 'http://79.99.1.153/dictor/dictor.css');
 	
 	// helper method
 	Array.prototype.map = function(fn){
@@ -279,10 +283,6 @@ function init(){
 		}
 	}
 	
-	var after = (new Date()).getTime() / 1000;
-	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
-	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
-	
 	function jsonpCall(src){
 		var s=document.createElement('script');
 		s.id = 'JSONP';
@@ -308,40 +308,45 @@ function init(){
 		}
 	}
 	
+	function addClass(elem, newClass){
+		elem.className = (elem.className == "" ? "" : elem.className + " ") + newClass;
+	}
+
+	function removeClass(elem, oldClass){
+		elem.className = elem.className.replace(new RegExp("(\\s|^)" + oldClass + "(\\s|$)"), '');
+	}  
+	
+	function hasClass(elem, testClass){
+		return elem.className.match(new RegExp("(\\s|^)" + testClass + "(\\s|$)"))
+	}
+	 
+	function findPos(obj){
+		var origObj = obj;
+	    var curleft = curtop = 0;
+	    if (obj.offsetParent) {
+	        do {
+	            curleft += obj.offsetLeft;
+	            curtop += obj.offsetTop;
+	        }
+	        while (obj = obj.offsetParent);
+	    }
+	
+	    return {
+	        xs: curleft,
+	        ys: curtop,
+			xe: curleft + origObj.offsetWidth,
+			ye: curtop + origObj.offsetHeight
+	    };
+	    
+	}
+	
+	var after = (new Date()).getTime() / 1000;
+	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
+	console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
+	
 	return { // must return all funcs to be remotely executed
 		translation: translation,
 		jsonpExec: jsonpExec
 	};
 }
  
-function addClass(elem, newClass){
-	elem.className = (elem.className == "" ? "" : elem.className + " ") + newClass;
-}
-
-function removeClass(elem, oldClass){
-	elem.className = elem.className.replace(new RegExp("(\\s|^)" + oldClass + "(\\s|$)"), '');
-}  
-
-function hasClass(elem, testClass){
-	return elem.className.match(new RegExp("(\\s|^)" + testClass + "(\\s|$)"))
-}
- 
-function findPos(obj){
-	var origObj = obj;
-    var curleft = curtop = 0;
-    if (obj.offsetParent) {
-        do {
-            curleft += obj.offsetLeft;
-            curtop += obj.offsetTop;
-        }
-        while (obj = obj.offsetParent);
-    }
-
-    return {
-        xs: curleft,
-        ys: curtop,
-		xe: curleft + origObj.offsetWidth,
-		ye: curtop + origObj.offsetHeight
-    };
-    
-}

@@ -1,87 +1,114 @@
-
-.flash {
- -webkit-animation-name: flash;
- -webkit-animation-duration: 0.7s;
- -webkit-animation-iteration-count: infinite;
- -webkit-animation-direction: alternate;
-}
-
-
-@-webkit-keyframes flash {
- from {
-   text-shadow: 0px 0px 1px #22aaff, 0px 0px 1px #22aaff, 0px 0px 1px #22aaff;
- }
-
- to {
-   /*text-shadow: 0px 0px 4px #22aaff, 0px 0px 8px #22aaff, 0px 0px 10px #22aaff;*/
-   text-shadow: 0px 0px 4px #f00, 0px 0px 8px #f00, 0px 0px 10px #f00;
- }
-}
-
 .dictorTransc {
-	background: #22aaff; /* should be semi-transparent! */
-	-webkit-border-radius: 8px;
-	padding: 8px;
+    position: absolute;
+    display: none;
 }
 
-.tapSwitch {
-	position: absolute; /* abstract this */
-	-webkit-border-top-left-radius: 20px;
-	background: #22aaff url(http://79.99.1.153/dictor/pics/word.png) center center no-repeat;
-	-webkit-background-size: 80%;
+.dictorLink.visible, .dictorTransc.visible {
+    display: block;
 }
 
-.tapExit {
-	position: absolute;
-	background: #22aaff;
-	-webkit-border-bottom-left-radius: 20px;
-}
-
-.tapLang {
-	position: absolute;
-	background: #22aaff;
-	-webkit-border-top-right-radius: 20px;
-}
-
-.tapHelp {
-	position: absolute;
-	background: #22aaff;
-	-webkit-border-bottom-right-radius: 20px;
-}
-
-.animTopLeft {
-  -webkit-transition-property: top, left, width, height;
-  -webkit-transition-duration: 0.4s;
+.dictorLink.hover {
+    color: #f00;
 }
 
 .dictorLink {
-	background: #22aaff;
-	-webkit-border-radius: 6px;
-	color: #fff;
-	padding: 4px;
-	white-space: nowrap;
+    position: absolute;
+    display: none;
+}
+
+.dictor {
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+.dictorActive {
+    text-shadow: 0px 0px 2px #22aaff, 0px 0px 4px #22aaff;
+    0px 0px 8px #22aaff;
+}
+
+.flash {
+    -webkit-animation-name: flash;
+    -webkit-animation-duration: 0.7s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+}
+@-webkit-keyframes flash {
+
+from {
+        text-shadow: 0px 0px 1px #22aaff, 0px 0px 1px #22aaff, 0px 0px 1px #22aaff;
+}
+
+to {
+        /*text-shadow: 0px 0px 4px #22aaff, 0px 0px 8px #22aaff, 0px 0px 10px #22aaff;*/
+        text-shadow: 0px 0px 4px #f00, 0px 0px 8px #f00, 0px 0px 10px #f00;
+}
+}
+
+.dictorTransc {
+    background: #22aaff; /* should be semi-transparent! */
+    -webkit-border-radius: 8px;
+    padding: 8px;
+}
+
+.tapSwitch {
+    position: absolute; /* abstract this */
+    -webkit-border-top-left-radius: 20px;
+    background: #22aaff url(http://79.99.1.153/dictor/pics/word.png) center center no-repeat;
+    -webkit-background-size: 80%;
+}
+
+.tapExit {
+    position: absolute;
+    background: #22aaff;
+    -webkit-border-bottom-left-radius: 20px;
+}
+
+.tapLang {
+    position: absolute;
+    background: #22aaff;
+    -webkit-border-top-right-radius: 20px;
+}
+
+.tapHelp {
+    position: absolute;
+    background: #22aaff;
+    -webkit-border-bottom-right-radius: 20px;
+}
+
+.animTopLeft {
+    -webkit-transition-property: top, left, width, height;
+    -webkit-transition-duration: 0.4s;
+}
+
+.dictorLink {
+    background: #22aaff;
+    -webkit-border-radius: 6px;
+    color: #fff;
+    padding: 4px;
+    white-space: nowrap;
 }
 
 .multi {
-	background: #22aaff url(http://79.99.1.153/dictor/pics/text.png) center center no-repeat;
+    background: #22aaff url(http://79.99.1.153/dictor/pics/text.png) center center no-repeat;
 }
 
 .langPicker select {
-	width: 40px;
-	height: 40px;
-	opacity: 0;
-	position: absolute;
+    width: 40px;
+    height: 40px;
+    opacity: 0;
+    position: absolute;
 }
 
 .langPicker {
-	position: relative;
-	width: 40px;
+    position: relative;
+    width: 40px;
 }
 
 .langShow {
-	position: absolute;
-	width: 40px;
-	height: 40px;
-	text-align: center;
-	line-height: 40px;
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
 }
