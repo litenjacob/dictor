@@ -23,6 +23,7 @@
 }
 
 .flash {
+	background: #c00;
     -webkit-animation-name: flash;
     -webkit-animation-duration: 0.7s;
     -webkit-animation-iteration-count: infinite;
@@ -31,11 +32,13 @@
 @-webkit-keyframes flash {
 
 from {
+		background: none;
         text-shadow: 0px 0px 1px #22aaff, 0px 0px 1px #22aaff, 0px 0px 1px #22aaff;
 }
 
 to {
         /*text-shadow: 0px 0px 4px #22aaff, 0px 0px 8px #22aaff, 0px 0px 10px #22aaff;*/
+		background: none;
         text-shadow: 0px 0px 4px #f00, 0px 0px 8px #f00, 0px 0px 10px #f00;
 }
 }

@@ -9,7 +9,9 @@
 //TODO: fix structure
 //TODO: objectify?
 //TODO: branding!
-//TODO: show loader
+//TODO: set bubble offset to rowheight
+//TODO: fix panel sizes
+//TODO: fix text size
 
 
 var dictor = init();
