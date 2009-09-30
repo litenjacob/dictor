@@ -314,6 +314,7 @@ function init(){
 		return elem.className.match(new RegExp("(\\s|^)" + testClass + "(\\s|$)"))
 	}
 	 
+	// Heavily based on code courtsey of Peter-Paul Koch 
 	function findPos(obj){
 		var origObj = obj;
 	    var curleft = curtop = 0;
