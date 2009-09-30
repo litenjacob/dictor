@@ -49,7 +49,7 @@ function init(){
 	
 	// get all spans into variable and bind touchevents
 	var spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-		n.ontouchstart = touchdown;
+		n.ontouchstart = touchdown; //TODO: addEventListener instead
 		return n;
 	});
 	
@@ -58,35 +58,83 @@ function init(){
 	link.className = 'dictorLink';
 	body.appendChild(link);
 	
+	//var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
+	/*var corners = [
+		{className: 'tapHelp', scroll: {v: 't', h: 'l'}, anim: 1},
+		{className: 'tapExit', scroll: {v: 't', h: 'r'}, anim: 1},
+		{className: 'tapSwitch', scroll: {v: 'b', h: 'r'}, anim: 1},
+		{className: 'tapLang', scroll: {v: 'b', h: 'l'}, anim: 1}	
+	].map(createDictorElem); //TODO: try this*/
+	
+	/*
+	 TODO: corners[3].chooselang... 
+	 */
+	
+	//TODO: these should be abstracted
 	// create tapswitch container
 	var tapSwitch = document.createElement('div');
 	tapSwitch.className = 'tapSwitch';
 	body.appendChild(tapSwitch);
 	
-	// create tapswitch container
+	// create tapExit container
 	var tapExit = document.createElement('div');
 	tapExit.className = 'tapExit';
 	body.appendChild(tapExit);
 	
+	// create tapLang container
+	var tapLang = document.createElement('div');
+	tapLang.className = 'tapLang';
+	body.appendChild(tapLang);
+	
+	// create tapHelp container
+	var tapHelp = document.createElement('div');
+	tapHelp.className = 'tapHelp';
+	body.appendChild(tapHelp);
+	
 	// Fix scrolling and anims
-	scrollFix(tapSwitch, 'vBottom', 'vRight');
-	scrollFix(tapExit, 'vTop', 'vRight');
+	scrollFix(tapSwitch, 'b', 'r');
+	scrollFix(tapExit, 't', 'r');
+	scrollFix(tapLang, 'b', 'l');
+	scrollFix(tapHelp, 't', 'l');
 	addClass(tapSwitch, 'animTopLeft');
 	addClass(tapExit, 'animTopLeft');
+	addClass(tapLang, 'animTopLeft');
+	addClass(tapHelp, 'animTopLeft');
+	
+	function createDictorElem(opts){ //TODO: bind onTap
+		var elem = document.createElement(opts.elemType || 'div');
+		elem.className = opts.className || '';
+		if(opts.append !== false && opts.append !== 0){
+			opts.append = opts.append || body;
+			opts.append.appendChild(elem);
+		}
+		if(opts.scroll){
+			document.addEventListener("scroll", function(){
+				scrollFix(elem, opts.scroll.v, opts.scroll.h); 
+			});
+			scrollFix(elem, opts.scroll.v, opts.scroll.h); // Prime-time
+		}
+		if(opts.anim){
+			addClass(elem, 'animTopLeft');
+		}
+		return elem;
+	}
 	
 	// create translation container'// create link container
 	var transc = document.createElement('div');
 	transc.className = 'dictorTransc';
-	body.appendChild(transc);
+	body.appendChild(transc);	
+	//var transc = createDictorElem({className: 'dictorTransc'});
 	
 	// init semi-global variables
 	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr;
 	
 	
 	// are we over a certain prepared element?
-	function isOverElem(e, location){
+	//TODO: deprecated
+	/*function isOverElem(e, location){
 		return e.pageX > location.xs && e.pageX < location.xe && e.pageY > location.ys && e.pageY < location.ye;
-	}
+	}*/
 	
 	function touchdown(e){
 		if(!from){ // this could be a lot prettier
@@ -148,11 +196,11 @@ function init(){
 			link.style.top = (p.ys - this.offsetHeight - 4) + 'px';
 			addClass(link, 'visible');
 			link.isVisible = true;
-			link.location = findPos(link);
+			link.location = findPos(link); //TODO: necessary?
 			return false;
 		}
 		
-		if(link.isVisible){
+		if(link.isVisible){  //TODO: should this be here?
 			link.isVisible = false;
 			removeClass(link, 'visible');
 		}	
@@ -204,8 +252,8 @@ function init(){
 	function scrollFix(elem, v, h){
 		var width = height = ( window.innerHeight * ( 40 / 373 ) );	
 		var fromTop = 0, fromLeft = 0;
-		if(v == 'vBottom') { fromTop = window.innerHeight - height  + 1}
-		if(h == 'vRight') { fromLeft = window.innerWidth - width + 1 }
+		if(v == 'b') { fromTop = window.innerHeight - height  + 1}
+		if(h == 'r') { fromLeft = window.innerWidth - width + 1 }
 		var height = ( window.innerHeight * ( 40 / 373 ) );	
 		elem.style.top = (window.pageYOffset + fromTop) + 'px';
 		elem.style.left = ( window.pageXOffset + fromLeft) + 'px';
@@ -214,9 +262,14 @@ function init(){
 		elem.style.fontSize = (height * 0.33) + 'px';
 	}
 	
-	document.addEventListener("scroll",  function(){ scrollFix(tapSwitch, 'vBottom', 'vRight'); scrollFix(tapExit, 'vTop', 'vRight'); }, false);
+	document.addEventListener("scroll",  function(){ // Abstract this
+		scrollFix(tapSwitch, 'b', 'r'); 
+		scrollFix(tapExit, 't', 'r');
+		scrollFix(tapLang, 'b', 'l');
+		scrollFix(tapHelp, 't', 'l'); 
+	}, false);
 	
-	tapSwitch.ontouchstart = function(){
+	tapSwitch.ontouchstart = function(){ // Possibly addEventListener - profile performance, though
 		if(hasClass(tapSwitch, 'multi')){
 			removeClass(tapSwitch, 'multi');
 			multi = false;

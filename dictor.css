@@ -25,7 +25,7 @@
 }
 
 .tapSwitch {
-	position: absolute;
+	position: absolute; /* abstract this */
 	-webkit-border-top-left-radius: 20px;
 	background: #22aaff url(http://79.99.1.153/dictor/pics/word.png) center center no-repeat;
 	-webkit-background-size: 80%;
@@ -35,6 +35,18 @@
 	position: absolute;
 	background: #22aaff;
 	-webkit-border-bottom-left-radius: 20px;
+}
+
+.tapLang {
+	position: absolute;
+	background: #22aaff;
+	-webkit-border-top-right-radius: 20px;
+}
+
+.tapHelp {
+	position: absolute;
+	background: #22aaff;
+	-webkit-border-bottom-right-radius: 20px;
 }
 
 .animTopLeft {
