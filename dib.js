@@ -48,33 +48,45 @@ function init(){
 	}
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = (dictor != undefined ? dictor.lang : null) || 'en', timer, panelsIsVisible = true, fixes = false;	
+	var spans, from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = (dictor != undefined ? dictor.lang : null) || 'en', timer, panelsIsVisible = true, fixes = false;	
 			
-	// magically wraps all words in dictor spans
 	var oldBody = body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
-	addClass(body, "dictorized");
-	body.innerHTML = body.innerHTML.split(/[<>]/).map(function(n, i){
-		if (i % 2) { return "<" + n + ">"; }
-		else { return n.replace(/([^\s]+)/gi, '<span class="dictor">$1</span>'); }
-	}).join("");
+	
+	// create link
+	var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
+	var dictorContainer = createDictorElem({elemType: 'div', className: 'dictorContainer', anim: 1, scroll: {v: 'b', h: 'r', width: 300, height: 45}});
+
+	// create translation container
+	var transc = createDictorElem({className: 'dictorTransc'});
+	
+	// magically wraps all words in dictor spans
+	function dictorize(arr){
+		addClass(body, "dictorized");
+		arr.forEach(function(baseNode){
+			baseNode.innerHTML = baseNode.innerHTML.split(/[<>]/).map(function(n, i){
+				if (i % 2) {
+					return "<" + n + ">";
+				}
+				else {
+					return n.replace(/([^\s]+)/gi, '<span class="dictor">$1</span>');
+				}
+			}).join("");
+		})
+		
+		// get all spans into variable and bind touchevents - this doesn't seem to be slower than binding using ontouchstart or even adding the ontouchstart on tag creation :) 
+		spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
+			n.addEventListener(dictorEvents['touchstart'], touchdown, false);
+			return n;
+		});
+	}
 	
 	var middle = (new Date()).getTime() / 1000;
-	
-	// get all spans into variable and bind touchevents - this doesn't seem to be slower than binding using ontouchstart or even adding the ontouchstart on tag creation :) 
-	var spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-		n.addEventListener(dictorEvents['touchstart'], touchdown, false);
-		return n;
-	});
 	
 	// kill links - not a pretty solution, but seems impossible to catch all link taps otherwise :S
 	var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
 		n.setAttribute('rel', n.getAttribute('href'));
 		n.setAttribute('href', '#');	
 	})
-	
-	// create link
-	var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
-	var dictorContainer = createDictorElem({elemType: 'div', className: 'dictorContainer', anim: 1, scroll: {v: 'b', h: 'r', width: 300, height: 45}});
 	
 	var tappables = [
 		{className: 'tapPick tappables', content: {text: 'dictorize'}, append: dictorContainer, 
@@ -125,31 +137,69 @@ function init(){
 		}
 	}
 	
+	// Support for picking certain containers
+	var isPicking = false;
 	var pickMenuUL = createDictorElem({elemType: 'ul', className: 'pickMenu', append: tappables[0]});
-	var pickMenuAll = createDictorElem({elemType: 'li', className: 'pickable pickAll', append: pickMenuUL, content: {'text' : 'all'}});
+	var pickMenuAll = createDictorElem({elemType: 'li', className: 'pickable pickAll', append: pickMenuUL, content: {'text' : 'all'},
+		events: {
+			touchstart: function(){ dictorize([body]); }
+		}
+	});
 	var pickMenuPick = createDictorElem({elemType: 'li', className: 'pickable pickPick', append: pickMenuUL, content: {'text' : 'pick'}, 
 		events: {
-			touchstart: primeContainers
+			touchstart: picking
 		}
 	});
 	var pickMenuNone = createDictorElem({elemType: 'li', className: 'pickable pickNone', append: pickMenuUL, content: {'text' : 'none'}});
 	
-	function primeContainers(){
-		console.log('priming');
-		addClass(body, 'dictorPicking');
-		var containerTags = ['div', 'p', 'h1', 'h2', 'h3'];
-		containerTags.forEach(function(item){
-			Array.prototype.slice.call(document.getElementsByTagName(item)).forEach(
-				function(obj){
+	// What containers to make pickable?
+	var containerTags = ['DIV', 'P', 'H1', 'H2', 'H3'];
+	function picking(e){
+		e.stopPropagation();
+		if (!isPicking) {
+			isPicking = true;
+			addClass(body, 'dictorPicking');
+			containerTags.forEach(function(item){
+				Array.prototype.slice.call(document.getElementsByTagName(item)).forEach(function(obj){
 					if (!hasClass(obj, 'dictorContainer')) { // fix all
 						addClass(obj, 'dictorPickable');
 						obj.addEventListener(dictorEvents['touchstart'], function(e){
-							console.log('tapit')
+							e.stopPropagation();
+							if (isPicking) { // only if we're picking - should probably remove eventlistener instead
+								if (hasClass(obj, 'dictorPicked')) {
+									removeClass(obj, 'dictorPicked');
+								}
+								else {
+									addClass(obj, 'dictorPicked');
+								}
+							}
 						}, false);
 					}
+				});
+			})
+		} else {
+			isPicking = false;
+			Array.prototype.slice.call(document.getElementsByClassName('dictorPicked')).forEach(function(obj){
+				Array.prototype.slice.call(obj.childNodes).forEach(function(childObj){
+					recursiveRemoveClass(childObj);
+				});
+			})
+			dictorize(Array.prototype.slice.call(document.getElementsByClassName('dictorPicked')));
+		}
+		return false;
+	}
+	
+	function recursiveRemoveClass(obj){
+		if (obj.childNodes.length) {
+			Array.prototype.slice.call(obj.childNodes).forEach(function(childObj){
+				if (childObj.nodeType != 3 && childObj.childNodes.length) {
+					recursiveRemoveClass(childObj);
 				}
-			);
-		})
+				if (containerTags.indexOf(obj.nodeName) != -1) {
+					removeClass(obj, 'dictorPicked');
+				}
+			})
+		}
 	}
 	
 	function createDictorElem(opts){
@@ -183,9 +233,6 @@ function init(){
 		}
 		return elem;
 	}
-	
-	// create translation container
-	var transc = createDictorElem({className: 'dictorTransc'});
 	
 	function touchdown(e){  // this could probably be a lot prettier
 		if(!from){ 
@@ -258,7 +305,6 @@ function init(){
 			link.isVisible = false;
 			removeClass(link, 'visible');
 		}
-		
 	}
 	
 	// touchmove hides panels
@@ -299,7 +345,7 @@ function init(){
 		// get the string for translation
 		tString = translated.slice(0).map(function(n){ addClass(n, "dictorActive"); return n.textContent }).join(" ");
 		
-		jsonpCall('http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=|' + toLangCode + '&context=translation&callback=dictor.jsonpExec&q=' + escape(tString));
+		jsonpCall('http://ajax.googleapisBAJS.com/ajax/services/language/translate?v=1.0&langpair=|' + toLangCode + '&context=translation&callback=dictor.jsonpExec&q=' + escape(tString));
 		
 		var i = 0, oldY;
 		do {
@@ -315,6 +361,7 @@ function init(){
 		from = to = false;
 		
 		// show loader
+		console.log('b', transc, transc.innerHTML, transc.parentNode);
 		transc.innerHTML = '<img src="http://79.99.1.153/dictor/pics/ajax-loader.gif" alt="loader"/>';
 		addClass(transc, 'visible');
 		timer = setTimeout(function(){
@@ -322,6 +369,7 @@ function init(){
 		}, 12000);
 		transc.style.left = (rs - 8) + 'px';
 		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+		console.log(transc, transc.innerHTML);
 	}
 	
 	function scrollFix(elem, o){
@@ -330,7 +378,6 @@ function init(){
 		var fromTop = 0, fromLeft = 0;
 		if(o.v == 'b') { fromTop = window.innerHeight - height }
 		if(o.h == 'r') { fromLeft = window.innerWidth - width }
-		console.log(o, fromLeft);
 
 		elem.style.top = (window.pageYOffset + fromTop) + 'px';
 		elem.style.left = ( window.pageXOffset + fromLeft) + 'px';
@@ -341,6 +388,7 @@ function init(){
 	
 	function translation(response, status, error){
 		if (status == 200) {
+			console.log(response.translatedText);
 			clearTimeout(timer);
 			transc.textContent = response.translatedText;
 			/*transc.style.width = width + 'px';*/

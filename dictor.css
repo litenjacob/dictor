@@ -173,5 +173,13 @@ to {
 }
 
 .dictorPicking .dictorPicked {
-	
+	background: url(http://79.99.1.153/dictor/pics/pickback_active.png) !important;	
+}
+
+.dictorPicking .dictorPicked .dictorPickable {
+	background: url(http://79.99.1.153/dictor/pics/pickback_active.png) !important;	
+}
+
+.dictorPicking .pickPick {
+	background: #070;
 }
