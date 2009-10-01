@@ -137,11 +137,16 @@ function init(){
 	function primeContainers(){
 		console.log('priming');
 		addClass(body, 'dictorPicking');
-		var containerTags = ['p', 'h1', 'h2', 'h3'];
+		var containerTags = ['div', 'p', 'h1', 'h2', 'h3'];
 		containerTags.forEach(function(item){
 			Array.prototype.slice.call(document.getElementsByTagName(item)).forEach(
 				function(obj){
-					addClass(obj, 'dictorPickable');
+					if (!hasClass(obj, 'dictorContainer')) { // fix all
+						addClass(obj, 'dictorPickable');
+						obj.addEventListener(dictorEvents['touchstart'], function(e){
+							console.log('tapit')
+						}, false);
+					}
 				}
 			);
 		})
