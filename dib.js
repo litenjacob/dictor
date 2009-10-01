@@ -12,6 +12,7 @@
 //TODO: set bubble offset to rowheight
 //TODO: fix panel sizes
 //TODO: fix text size
+//TODO: make containers pickable for dictorizing
 
 
 var dictor = init();
@@ -47,7 +48,7 @@ function init(){
 	}
 	
 	// init semi-global variables
-	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = (dictor != undefined ? dictor.lang : null) || 'en', timer, panelsIsVisible = true;	
+	var from, to, translated = false, over = false, threshold = 500, multi = false, width, rs, rr, toLangCode = (dictor != undefined ? dictor.lang : null) || 'en', timer, panelsIsVisible = true, fixes = false;	
 			
 	// magically wraps all words in dictor spans
 	var oldBody = body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
@@ -73,17 +74,24 @@ function init(){
 	
 	// create link
 	var link = createDictorElem({elemType: 'a', className: 'dictorLink'});
+	var dictorContainer = createDictorElem({elemType: 'div', className: 'dictorContainer', anim: 1, scroll: {v: 'b', h: 'r', width: 300, height: 45}});
 	
-	var corners = [
-		{className: 'tapHelp tappables', scroll: {v: 't', h: 'l'}, anim: 1, content: {text: '?'}},
-		{className: 'tapExit tappables', scroll: {v: 't', h: 'r'}, anim: 1, content: {text: 'x'},
+	var tappables = [
+		{className: 'tapPick tappables', content: {text: 'pick'}, append: dictorContainer, 
+			events: {
+				touchstart: function(e){
+					console.log('pickem');
+				}
+			}
+		},
+		{className: 'tapExit tappables', content: {text: 'x'}, append: dictorContainer,
 			events: {
 				touchstart: function(e){
 					body.innerHTML = oldBody;
 				}
 			}
 		},
-		{className: 'tapSwitch tappables', scroll: {v: 'b', h: 'r'}, anim: 1, 
+		{className: 'tapSwitch tappables', append: dictorContainer,
 			events: {
 				touchstart: function(e){
 					e.preventDefault();
@@ -97,24 +105,27 @@ function init(){
 				}
 			}
 		},
-		{className: 'tapLang tappables', scroll: {v: 'b', h: 'l'}, anim: 1}	
+		{className: 'tapLang tappables', append: dictorContainer}	
 	].map(createDictorElem);
 	
 	// language picker
 	var langs = '<select id="langSelect"><option value="ar">العربية</option><option value="bg">български</option><option value="ca">català</option><option value="cs">česky</option><option value="da">Dansk</option><option value="de">Deutsch</option><option value="el">Ελληνικά</option><option value="en">English</option><option value="es">Español</option><option value="fi">suomi</option><option value="fr">Français</option><option value="hi">हिन्दी</option><option value="hr">hrvatski</option><option value="id">Indonesia</option><option value="it">Italiano</option><option value="iw">עברית</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="lt">Lietuvių</option><option value="lv">latviešu</option><option value="nl">Nederlands</option><option value="no">norsk</option><option value="pl">Polski</option><option value="pt">Português</option><option value="ro">Română</option><option value="ru">Русский</option><option value="sk">slovenčina</option><option value="sl">slovenščina</option><option value="sr">српски</option><option value="sv">svenska</option><option value="tl">Filipino</option><option value="uk">українська</option><option value="vi">Tiếng Việt</option><option id="opsvzh-CN" value="zh-CN">中文 (简体)</option><option id="opsvzh-TW" value="zh-TW">中文 (繁體)</option></select>';
-	corners[3].innerHTML = '<span id="toLangContainer" class="langPicker"><span id="toLang" class="langShow">sv</span>' + langs + '</span>';
+	tappables[3].innerHTML = '<div id="toLangContainer" class="langPicker"><span id="toLang" class="langShow">sv</span>' + langs + '</div>';
 	var langSelect = document.getElementById('langSelect');
 	var toLangLabel = document.getElementById('toLang');
 	langSelect.addEventListener('change', function(){
 		toLangLabel.textContent = toLangCode = this.value;
 	}, false);
 	
+	// find my lang - not pretty - use something else. xPath?
 	for(var i = 0; i < langSelect.options.length; i++){
 		if(langSelect.options[i].value == toLangCode){
 			langSelect.options[i].selected = true;
 			toLangLabel.textContent = toLangCode;
 		}
 	}
+	
+	
 	
 	function createDictorElem(opts){
 		var elem = document.createElement(opts.elemType || 'div');
@@ -125,9 +136,10 @@ function init(){
 		}
 		if(opts.scroll){
 			document.addEventListener("scroll", function(){
-				scrollFix(elem, opts.scroll.v, opts.scroll.h); 
+				scrollFix(elem, opts.scroll); 
 			}, false);
-			scrollFix(elem, opts.scroll.v, opts.scroll.h); // Prime-time
+			scrollFix(elem, opts.scroll); // Prime-time
+			
 		}
 		if(opts.anim){
 			//addClass(elem, 'animTopLeft');
@@ -287,12 +299,14 @@ function init(){
 		transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
 	}
 	
-	function scrollFix(elem, v, h){
-		var width = height = ( window.innerHeight * ( 40 / 373 ) );	
+	function scrollFix(elem, o){
+		var width = o.width * (window.innerWidth / 320);
+		var height = o.height * (window.innerHeight / 380);	
 		var fromTop = 0, fromLeft = 0;
-		if(v == 'b') { fromTop = window.innerHeight - height  + 1}
-		if(h == 'r') { fromLeft = window.innerWidth - width + 1 }
-		var height = ( window.innerHeight * ( 40 / 373 ) );	
+		if(o.v == 'b') { fromTop = window.innerHeight - height }
+		if(o.h == 'r') { fromLeft = window.innerWidth - width }
+		console.log(o, fromLeft);
+
 		elem.style.top = (window.pageYOffset + fromTop) + 'px';
 		elem.style.left = ( window.pageXOffset + fromLeft) + 'px';
 		elem.style.width = width + 'px'; 
