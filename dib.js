@@ -77,7 +77,7 @@ function init(){
 	var dictorContainer = createDictorElem({elemType: 'div', className: 'dictorContainer', anim: 1, scroll: {v: 'b', h: 'r', width: 300, height: 45}});
 	
 	var tappables = [
-		{className: 'tapPick tappables', content: {text: 'pick'}, append: dictorContainer, 
+		{className: 'tapPick tappables', content: {text: 'dictorize'}, append: dictorContainer, 
 			events: {
 				touchstart: function(e){
 					console.log('pickem');
@@ -125,7 +125,27 @@ function init(){
 		}
 	}
 	
+	var pickMenuUL = createDictorElem({elemType: 'ul', className: 'pickMenu', append: tappables[0]});
+	var pickMenuAll = createDictorElem({elemType: 'li', className: 'pickable pickAll', append: pickMenuUL, content: {'text' : 'all'}});
+	var pickMenuPick = createDictorElem({elemType: 'li', className: 'pickable pickPick', append: pickMenuUL, content: {'text' : 'pick'}, 
+		events: {
+			touchstart: primeContainers
+		}
+	});
+	var pickMenuNone = createDictorElem({elemType: 'li', className: 'pickable pickNone', append: pickMenuUL, content: {'text' : 'none'}});
 	
+	function primeContainers(){
+		console.log('priming');
+		addClass(body, 'dictorPicking');
+		var containerTags = ['p', 'h1', 'h2', 'h3'];
+		containerTags.forEach(function(item){
+			Array.prototype.slice.call(document.getElementsByTagName(item)).forEach(
+				function(obj){
+					addClass(obj, 'dictorPickable');
+				}
+			);
+		})
+	}
 	
 	function createDictorElem(opts){
 		var elem = document.createElement(opts.elemType || 'div');

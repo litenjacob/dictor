@@ -126,13 +126,48 @@ to {
 }
 
 .tappables {
-	width: 40px;
+	/*width: 40px;*/
+	min-width: 40px;
+	padding: 5px;
     height: 40px;
+	line-height: 40px;
     text-align: center;
-    line-height: 40px;
 	float: left;
+	position: relative;
 }
 
 .dictorHide .dictorContainer {
 	display: none;
+}
+
+.pickMenu {
+	position: absolute;
+	top: -45px;
+	left: 15px;
+	list-style: none;
+	width: 300px;
+	margin: 0;
+	padding: 0;
+}
+
+.pickAll {
+	-webkit-border-top-left-radius: 20px;
+	-moz-border-radius-topleft: 20px;
+	border-top-left-radius: 20px;	
+}
+
+.pickNone {
+	-webkit-border-top-right-radius: 20px;
+	-moz-border-radius-topright: 20px;
+	border-top-right-radius: 20px;	
+}
+
+.pickMenu li {
+	float: left;
+	padding: 5px;
+	background: #22aaff;
+}
+
+.dictorPicking .dictorPickable {
+	background: red !important;
 }
