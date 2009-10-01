@@ -15,14 +15,45 @@
 //TODO: make containers pickable for dictorizing
 
 
-var dictor = init();
+var dictor = {
+	eventBridge: {
+		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
+	},
+	init: function(){
+		
+	},
+	utils: {
+		addClass: function(elem, newClass){
+			elem.className = (elem.className == "" ? "" : elem.className + " ") + newClass;
+		},
+		removeClass: function(elem, oldClass){
+			elem.className = elem.className.replace(new RegExp("(\\s|^)" + oldClass + "(\\s|$)"), '');
+		},  
+		hasClass: function(elem, testClass){
+			return elem.className.match(new RegExp("(\\s|^)" + testClass + "(\\s|$)"))
+		},
+		findPos: function(obj){	// Heavily based on code courtsey of Peter-Paul Koch 
+			var origObj = obj;
+		    var curleft = curtop = 0;
+		    if (obj.offsetParent) {
+		        do {
+		            curleft += obj.offsetLeft;
+		            curtop += obj.offsetTop;
+		        }
+		        while (obj = obj.offsetParent);
+		    }
+		    return {
+		        xs: curleft,
+		        ys: curtop,
+				xe: curleft + origObj.offsetWidth,
+				ye: curtop + origObj.offsetHeight
+		    }; 
+		}
+	}
+}
 
 function init(){
 	var dictorContext = this;
-	
-	var dictorEvents = {
-		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
-	}
 	
 	var before = (new Date()).getTime() / 1000;
 	var body = document.getElementsByTagName('body')[0];
@@ -421,38 +452,7 @@ function init(){
 		}
 	}
 	
-	function addClass(elem, newClass){
-		elem.className = (elem.className == "" ? "" : elem.className + " ") + newClass;
-	}
-
-	function removeClass(elem, oldClass){
-		elem.className = elem.className.replace(new RegExp("(\\s|^)" + oldClass + "(\\s|$)"), '');
-	}  
 	
-	function hasClass(elem, testClass){
-		return elem.className.match(new RegExp("(\\s|^)" + testClass + "(\\s|$)"))
-	}
-	 
-	// Heavily based on code courtsey of Peter-Paul Koch 
-	function findPos(obj){
-		var origObj = obj;
-	    var curleft = curtop = 0;
-	    if (obj.offsetParent) {
-	        do {
-	            curleft += obj.offsetLeft;
-	            curtop += obj.offsetTop;
-	        }
-	        while (obj = obj.offsetParent);
-	    }
-	
-	    return {
-	        xs: curleft,
-	        ys: curtop,
-			xe: curleft + origObj.offsetWidth,
-			ye: curtop + origObj.offsetHeight
-	    };
-	    
-	}
 	
 	var after = (new Date()).getTime() / 1000;
 	console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
