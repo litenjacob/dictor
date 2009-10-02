@@ -6,13 +6,11 @@
 //http://www.google.com/uds/samples/language/branding.html
 //http://code.google.com/intl/sv-SE/apis/ajaxlanguage/documentation/#Examples
 
-//TODO: fix structure
-//TODO: objectify?
 //TODO: branding!
 //TODO: set bubble offset to rowheight
 //TODO: fix panel sizes
 //TODO: fix text size
-//TODO: make containers pickable for dictorizing
+//TODO: check body.innerHTML length and allow dictorizeAll only if machine fast enough
 
 
 var dictor = {
@@ -27,7 +25,7 @@ var dictor = {
 		width: null, 
 		rs: null, 
 		rr: null, 
-		toLangCode: (dictorOpts != undefined ? dictorOpts.lang : null) || 'en', 
+		toLangCode: (window['dictorOpts'] != undefined ? dictorOpts.lang : null) || 'en', 
 		timer: null, 
 		panelsIsVisible: true, 
 		fixes: false,
@@ -73,7 +71,10 @@ var dictor = {
 		// kill links - not a pretty solution, but seems impossible to catch all link taps otherwise :S
 		var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
 			n.setAttribute('rel', n.getAttribute('href'));
-			n.setAttribute('href', '#');	
+			n.setAttribute('href', '#');
+			n.addEventListener(dictor.eventBridge.touchdown, function(e){
+				e.preventDefault(); // to prevent link jumping - works, but is it right?
+			}, false);	
 		})
 		
 		dom.tappables = [
@@ -132,12 +133,11 @@ var dictor = {
 			events: {
 				touchstart: function(){
 					var elems = [];
-					Array.prototype.slice.call(dom.body.childNodes).forEach(function(item, arr){
+					Array.prototype.slice.call(dom.body.childNodes).forEach(function(item, arr){ // get all non-dictory elements in body
 						if(item.nodeType == 1 && item.className.indexOf('dictor') == -1){
 							elems.push(item);
 						}	
 					}) 
-					console.log(elems)
 					dictor.dictorize(elems); 
 					//console.log(dom.body.childNodes); 
 				}
@@ -162,6 +162,8 @@ var dictor = {
 			utils.removeClass(dom.body, 'dictorHide');
 			vars.panelsIsVisible = true;
 		}, false)
+		
+		console.log('oldBodyLenght', vars.oldBody.length);
 		
 		var after = (new Date()).getTime() / 1000;
 		//console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
@@ -215,7 +217,7 @@ var dictor = {
 			var re = utils.findPos(vars.translated[--i]).xe;
 			
 			dictor.translation.showLoader(rs, rr);
-			dictor.net.jsonpCall('http://ajax.googleapisBAJS.com/ajax/services/language/translate?v=1.0&langpair=|' + dictor.vars.toLangCode + '&context=showTranslation&callback=dictor.net.jsonpExec&q=' + escape(tString));
+			dictor.net.jsonpCall('http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=|' + dictor.vars.toLangCode + '&context=showTranslation&callback=dictor.net.jsonpExec&q=' + escape(tString));
 		},
 		showTranslation: function(response, status, error){
 			if (status == 200) {
@@ -284,6 +286,7 @@ var dictor = {
 			return false;
 		},
 		dictorElemTouchdown: function(e){  // this could probably be a lot prettier
+			e.stopPropagation();
 			var vars = dictor.vars;
 			var utils = dictor.utils;
 			
@@ -351,7 +354,7 @@ var dictor = {
 				utils.addClass(link, 'visible');
 				link.isVisible = true;
 				link.location = utils.findPos(link); //TODO: necessary?
-				e.stopPropagation();
+				e.preventDefault();
 				return false;
 			}
 			
