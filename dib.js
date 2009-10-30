@@ -295,16 +295,17 @@ var dictor = {
 			}
 			return false;
 		},
-		dictorElemTouchdown: function(e){  // this could probably be a lot prettier
+		dictorElemTouchdown: function(e, elem){  // this could probably be a lot prettier
 			e.stopPropagation();
+			var elem = elem || this;
 			var vars = dictor.vars;
 			var utils = dictor.utils;
 			
 			if(!vars.from){ 
-				vars.from = this;
+				vars.from = elem;
 				vars.from.stamp = new Date().getTime();
-			} else { 
-				if(this == vars.from && (new Date().getTime() - vars.from.stamp) < vars.threshold){ // did we touch from again in time?
+			} else {
+				if(elem == vars.from && (new Date().getTime() - vars.from.stamp) < vars.threshold){ // did we touch from again in time?
 					if (!vars.multi) {
 						e.preventDefault();
 						dictor.translation.removeTranslation();
@@ -319,32 +320,32 @@ var dictor = {
 					}
 				} else{
 					if(!vars.multi){
-						vars.from = this;
+						vars.from = elem;
 						vars.from.stamp = new Date().getTime();
 					} else {
-						if (this == vars.from) {
+						if (elem == vars.from) {
 							utils.removeClass(vars.from, 'flash');
 							vars.from = false;
 						}
 						else {
 							if (vars.from.isActive) {
 								if (!vars.to) {
-									vars.to = this;
+									vars.to = elem;
 									vars.to.stamp = new Date().getTime();
 								}
 								else {
-									if (this == vars.to && (new Date().getTime() - vars.to.stamp) < vars.threshold) {
+									if (elem == vars.to && (new Date().getTime() - vars.to.stamp) < vars.threshold) {
 										e.preventDefault();
 										dictor.translation.removeTranslation();
 										dictor.translation.getWords();
 										return false;
 									} else {
-										vars.to = this;
+										vars.to = elem;
 										vars.to.stamp = new Date().getTime();
 									}
 								}
 							} else {
-								vars.from = this;
+								vars.from = elem;
 								vars.from.stamp = new Date().getTime();
 							}
 						}
@@ -354,13 +355,13 @@ var dictor = {
 			
 			var link = dictor.dom.link;
 			// if we're touching a link, show linkhelper to make it 'clickable'
-			if (this.parentNode.nodeName == 'A') {	
-				var p = utils.findPos(this);
-				var a = this.parentNode;
+			if (elem.parentNode.nodeName == 'A') {	
+				var p = utils.findPos(elem);
+				var a = elem.parentNode;
 				link.textContent = "Goto: " + a.textContent;
 				link.setAttribute('href', a.getAttribute('rel'));
 				link.style.left = (p.xs - 4) + 'px';
-				link.style.top = (p.ys - this.offsetHeight - 4) + 'px';
+				link.style.top = (p.ys - elem.offsetHeight - 4) + 'px';
 				utils.addClass(link, 'visible');
 				link.isVisible = true;
 				link.location = utils.findPos(link); //TODO: necessary?
@@ -510,9 +511,9 @@ var dictor = {
 }
 
 dictor.init();
-/*
-console.log(dictor);
-var ps = document.getElementsByTagName('p');
+
+//console.log(dictor);
+/*var ps = document.getElementsByTagName('p');
 for(var i = 0; i < ps.length; i++){
 	ps[i].addEventListener(dictor.eventBridge.touchstart, function(e){
 		var elem = document.elementFromPoint(e.pageX, e.pageY);
@@ -521,8 +522,13 @@ for(var i = 0; i < ps.length; i++){
 		var newElem = document.elementFromPoint(e.pageX, e.pageY);
 		console.log(newElem);
 	}, false);
-}
-*/
+}*/
+
+
+
+
+
+
 
 
  

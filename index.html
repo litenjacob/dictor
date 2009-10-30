@@ -8,17 +8,17 @@
 		<script type="text/javascript" src="resources-api.js"></script-->
 		
 		<link rel="stylesheet" type="text/css" href="dictor.css"/>
-		<script type="text/javascript">
+		<!--script type="text/javascript">
 			window.onload = function(){
 				dictorOpts = {lang: 'sv'};
 				var h=document.getElementsByTagName("head")[0];
 				var s=document.createElement('script');
 				s.type='text/javascript';
 				s.charset = 'utf-8';
-				s.src='http://79.99.1.153/dictor/dib.js?' + (new Date()).getTime();
+				s.src='http://localhost/apps/dictor/dib.js?' + (new Date()).getTime();
 				h.appendChild(s);
 			}
-		</script>
+		</script-->
 	</head>
 	<body>
 		<h1 rel="hej">Hello</h1>
@@ -29,5 +29,51 @@
 		<div>
 			<p>At the end of 2008, 72,9% of Swedes belonged to the Church of Sweden (Lutheran), this number has been decreasing by about 1% on a yearly basis for the last two decades. <p>Church of Sweden services are sparsely attended (hovering in the single <p>digit<p> percentages of the population).</p><p> Between 46–85% of the population can be classified as atheist or agnostic. The reason for the large number of inactive members is partly that until 1996, children became members automatically at birth if at least one of the parents was a member. Since 1996, only children that are christened become members. Some 275,000 Swedes are today members of various free churches (where congregation attendance is much higher), and, in addition, <a href="/wiki/Immigration" title="Immigration">immigration</a> has meant that there are now some 92,000 <a href="/wiki/Roman_Catholics" title="Roman Catholics" class="mw-redirect">Roman Catholics</a> and 100,000 <a href="/wiki/Eastern_Orthodox_Church" title="Eastern Orthodox Church" class="mw-redirect">Eastern Orthodox Christians</a> living in Sweden.<sup id="cite_ref-109" class="reference"><a href="#cite_note-109"><span>[</span>110<span>]</span></a></sup> Because of <a href="/wiki/Immigration" title="Immigration">immigration</a>, Sweden also has a significant <a href="/wiki/Muslim" title="Muslim">Muslim</a> population. Almost half a million are Muslims by tradition, but approximately 5% (25,000) of these actively practise Islam (in the sense of attending Friday prayer and praying five times a day).<sup id="cite_ref-110" class="reference"><a href="#cite_note-110"><span>[</span>111<span>]</span></a></sup> (See <a href="/wiki/Islam_in_Sweden" title="Islam in Sweden">Islam in Sweden</a>.)</p>
 		</div>
+		<script type="text/javascript">
+//(function(){
+	
+	var elem = null;
+	var time = 0;
+	var point = {};
+	document.getElementsByTagName('body')[0].addEventListener('mousedown', function(e){
+		if(e.originalTarget.className.indexOf('dictor') != -1){ return false; }
+		if(e.originalTarget == elem && new Date().getTime() - time < 500){
+			if(window['dictor'] != undefined){
+				sendToDictor(elem, point, e);
+			} else {
+				var s=document.createElement('script');
+				s.type='text/javascript';
+				s.charset = 'utf-8';
+				s.src='http://localhost/apps/dictor/dib.js?' + (new Date()).getTime();
+				document.getElementsByTagName("head")[0].appendChild(s);
+				s.onreadystatechange = function(){
+				    if (script.readyState == 'loaded' || script.readyState == 'complete') {
+				        sendToDictor(elem, point, e);
+				    }   
+				}
+				s.onload = function(){
+					sendToDictor(elem, point, e);
+				    return;   
+				}
+			}
+			
+			function sendToDictor(elem, point, e){
+				dictor.dictorize([elem]);
+				var firstElem = document.elementFromPoint(point.x, point.y);
+				var secondElem = document.elementFromPoint(e.pageX, e.pageY);
+				if(firstElem == secondElem){
+					dictor.touch.dictorElemTouchdown(e, firstElem);
+					dictor.touch.dictorElemTouchdown(e, secondElem);
+				}
+			}
+		}
+		elem = e.originalTarget;
+		time = new Date().getTime();
+		point.x = e.pageX;
+		point.y = e.pageY;
+		return false;
+	}, false)	
+//})()
+		</script>
 	</body>
 </html>
