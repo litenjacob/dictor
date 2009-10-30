@@ -1,3 +1,13 @@
+/*
+ * elementFromPoint is the shit
+ * possible to only have mousedown (touchdown) listener on document and get originaltarget from it?
+ * then see if doubleclick, and if so feed to dictorizer
+ * also see if targetElem hasClass dictor
+ * 
+ * Check howto create FF plugin
+ * Use rgba for background and border
+ */
+
 /**
  * @author jacob
  */
@@ -500,5 +510,19 @@ var dictor = {
 }
 
 dictor.init();
+/*
+console.log(dictor);
+var ps = document.getElementsByTagName('p');
+for(var i = 0; i < ps.length; i++){
+	ps[i].addEventListener(dictor.eventBridge.touchstart, function(e){
+		var elem = document.elementFromPoint(e.pageX, e.pageY);
+		console.log(elem);
+		dictor.dictorize([elem]);
+		var newElem = document.elementFromPoint(e.pageX, e.pageY);
+		console.log(newElem);
+	}, false);
+}
+*/
+
 
  
