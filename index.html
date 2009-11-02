@@ -36,20 +36,19 @@
 	// data-uris for images?
 	// greasemonkey compiler resources?
 	
-	document.addEventListener('keydown', function(e){
-		if(e.keyCode == 18 && window['dictor'] != undefined){
-			dictor.vars.multi = !dictor.vars.multi;
-		}
-	}, false);
-
+	
+	// fix different behaviours
 	var relativeWhat = (/safari|opera/i).test(navigator.userAgent) ? { x: 'pageX', y: 'pageY' } : { x: 'clientX', y: 'clientY' };
 	
 	var elem = null;
 	var time = 0;
 	var point = {};
-	document.getElementsByTagName('body')[0].addEventListener('mousedown', function(e){
+	document.getElementsByTagName('body')[0].addEventListener('ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown', function(e){
 		var eTarget = e.srcElement || e.originalTarget;
 		if(eTarget.className.indexOf('dictor') != -1){ return false; }
+		if(window['dictor'] != undefined && dictor.vars.translated.length){
+			dictor.translation.removeTranslation();
+		}
 		if(eTarget == elem && new Date().getTime() - time < 500){
 			function sendToDictor(elem, point, e){
 				dictor.dictorize([elem]);

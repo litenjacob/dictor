@@ -39,10 +39,14 @@ var dictor = {
 		timer: null, 
 		panelsIsVisible: true, 
 		fixes: false,
-		containerTags: ['DIV', 'P', 'H1', 'H2', 'H3']	
+		containerTags: ['DIV', 'P', 'H1', 'H2', 'H3'],
+		dragging: false,
+		offset: null	
 	},
 	eventBridge: {
-		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown'
+		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
+		touchmove:  'ontouchmove' in document.documentElement ? 'touchmove' : 'mousemove',
+		touchend:  'ontouchend' in document.documentElement ? 'touchend' : 'mouseup'
 	},
 	init: function(){
 		// localize often used dictor properties
@@ -76,7 +80,16 @@ var dictor = {
 		dom.dictorContainer = utils.createDictorElem({elemType: 'div', className: 'dictorContainer', scroll: {v: 'b', h: 'r', width: 300, height: 45}});
 	
 		// create translation container
-		dom.transc = utils.createDictorElem({className: 'dictorTransc'});
+		dom.transc = utils.createDictorElem({className: 'dictorTransc', events: {
+				touchstart: function(e){ 
+					vars.dragging = true;
+					var p =  utils.findPos(this);
+					var e = e['touches'] ? e.touches[0] : e;
+					vars.offset = {x: p.xs - e.pageX, y: p.ys - e.pageY};
+				},
+				touchend: function(){ vars.dragging = false; console.log('up'); }
+			}
+		});
 		
 		// kill links - not a pretty solution, but seems impossible to catch all link taps otherwise :S
 		var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
@@ -88,31 +101,18 @@ var dictor = {
 		})
 		
 		dom.tappables = [
-			{className: 'tapPick tappables', content: {text: 'dictorize'}, append: dom.dictorContainer, 
+			{className: 'tapExit tappables', content: {text: 'close'}, append: dom.dictorContainer,
 				events: {
 					touchstart: function(e){
-						console.log('pickem');
+						//dom.body.innerHTML = vars.oldBody;
 					}
 				}
 			},
-			{className: 'tapExit tappables', content: {text: 'x'}, append: dom.dictorContainer,
-				events: {
-					touchstart: function(e){
-						dom.body.innerHTML = vars.oldBody;
-					}
-				}
-			},
-			{className: 'tapSwitch tappables', append: dom.dictorContainer,
+			{className: 'tapSwitch tappables', content: { text: 'word'}, append: dom.dictorContainer,
 				events: {
 					touchstart: function(e){
 						e.preventDefault();
-						if(utils.hasClass(this, 'multi')){
-							utils.removeClass(this, 'multi');
-							vars.multi = false;
-						} else {
-							utils.addClass(this, 'multi');
-							vars.multi = true;
-						}
+						dictor.translation.changeMode();
 					}
 				}
 			},
@@ -121,7 +121,7 @@ var dictor = {
 		
 		// language picker
 		var langs = '<select id="langSelect"><option value="ar">العربية</option><option value="bg">български</option><option value="ca">català</option><option value="cs">česky</option><option value="da">Dansk</option><option value="de">Deutsch</option><option value="el">Ελληνικά</option><option value="en">English</option><option value="es">Español</option><option value="fi">suomi</option><option value="fr">Français</option><option value="hi">हिन्दी</option><option value="hr">hrvatski</option><option value="id">Indonesia</option><option value="it">Italiano</option><option value="iw">עברית</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="lt">Lietuvių</option><option value="lv">latviešu</option><option value="nl">Nederlands</option><option value="no">norsk</option><option value="pl">Polski</option><option value="pt">Português</option><option value="ro">Română</option><option value="ru">Русский</option><option value="sk">slovenčina</option><option value="sl">slovenščina</option><option value="sr">српски</option><option value="sv">svenska</option><option value="tl">Filipino</option><option value="uk">українська</option><option value="vi">Tiếng Việt</option><option id="opsvzh-CN" value="zh-CN">中文 (简体)</option><option id="opsvzh-TW" value="zh-TW">中文 (繁體)</option></select>';
-		dom.tappables[3].innerHTML = '<div id="toLangContainer" class="langPicker"><span id="toLang" class="langShow">sv</span>' + langs + '</div>';
+		dom.tappables[2].innerHTML = '<div id="toLangContainer" class="langPicker"><span id="toLang" class="langShow">sv</span>' + langs + '</div>';
 		var langSelect = document.getElementById('langSelect');
 		var toLangLabel = document.getElementById('toLang');
 		langSelect.addEventListener('change', function(){
@@ -136,35 +136,16 @@ var dictor = {
 			}
 		}
 		
-		// Support for picking certain containers
-		vars.isPicking = false;
-		var pickMenuUL = utils.createDictorElem({elemType: 'ul', className: 'pickMenu', append: dom.tappables[0]});
-		var pickMenuAll = utils.createDictorElem({elemType: 'li', className: 'pickable pickAll', append: pickMenuUL, content: {'text' : 'all'},
-			events: {
-				touchstart: function(){
-					var elems = [];
-					Array.prototype.slice.call(dom.body.childNodes).forEach(function(item, arr){ // get all non-dictory elements in body
-						if(item.nodeType == 1 && item.className.indexOf('dictor') == -1){
-							elems.push(item);
-						}	
-					}) 
-					dictor.dictorize(elems); 
-					//console.log(dom.body.childNodes); 
-				}
-			}
-		});
-		var pickMenuPick = utils.createDictorElem({elemType: 'li', className: 'pickable pickPick', append: pickMenuUL, content: {'text' : 'pick'}, 
-			events: {
-				touchstart: dictor.touch.picking
-			}
-		});
-		var pickMenuNone = utils.createDictorElem({elemType: 'li', className: 'pickable pickNone', append: pickMenuUL, content: {'text' : 'none'}});
-	
 		// touchmove hides panels
-		document.addEventListener('touchmove', function(){
+		document.addEventListener(dictor.eventBridge.touchmove, function(e){
 			if (vars.panelsIsVisible) {
 				utils.addClass(dom.body, 'dictorHide');
 				vars.panelsIsVisible = false;
+			}
+			if(vars.dragging){
+				var e = e['touches'] ? e.touches[0] : e;
+				dictor.dom.transc.style.top = (e.pageY + vars.offset.y) + 'px';
+				dictor.dom.transc.style.left = (e.pageX + vars.offset.x) + 'px';
 			}
 		}, false)
 		
@@ -172,6 +153,12 @@ var dictor = {
 			utils.removeClass(dom.body, 'dictorHide');
 			vars.panelsIsVisible = true;
 		}, false)
+		
+		document.addEventListener('keydown', function(e){
+			if(e.keyCode == 18){
+				dictor.translation.changeMode();
+			}
+		}, false);
 		
 		console.log('oldBodyLenght', vars.oldBody.length);
 		
@@ -244,6 +231,10 @@ var dictor = {
 				});
 				dictor.vars.translated = false;
 			}
+		},
+		changeMode: function(){
+			dictor.vars.multi = !dictor.vars.multi;
+			dictor.dom.tappables[1].innerHTML = dictor.vars.multi ? 'multi' : 'word';
 		}
 	},
 	touch: {
