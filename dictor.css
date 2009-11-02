@@ -88,6 +88,12 @@ to {
 	border-top-left-radius: 20px;
 }
 
+.dictor-desktop .dictorContainer {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+}
+
 .animTopLeft {
     -webkit-transition-property: top, left, width, height;
     -webkit-transition-duration: 0.4s;
@@ -170,6 +176,8 @@ to {
 	padding: 5px;
 	background: #22aaff;
 }*/
+
+
 
 .dictorPicking .dictorPickable {
 	background: url(http://79.99.1.153/dictor/pics/pickback.png) !important;

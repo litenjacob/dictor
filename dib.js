@@ -58,6 +58,8 @@ var dictor = {
 		var before = (new Date()).getTime() / 1000;
 		dom.body = document.getElementsByTagName('body')[0];
 		if (dom.body.className.match(/dictorized/)) { return false; } // already dictorized?
+		utils.addClass(dom.body, vars.iphone ? 'dictor-iphone' : 'dictor-desktop');
+		
 		
 		dom.head = document.getElementsByTagName('head')[0];
 	
@@ -114,11 +116,14 @@ var dictor = {
 				events: {
 					touchstart: function(e){
 						e.preventDefault();
+						e.stopPropagation();
 						dictor.translation.changeMode();
 					}
 				}
 			},
-			{className: 'tapLang tappables', append: dom.dictorContainer}	
+			{className: 'tapLang tappables', append: dom.dictorContainer, events: {
+					touchstart: function(e){ e.preventDefault(); e.stopPropagation(); } // preventer
+				}}	
 		].map(utils.createDictorElem);
 		
 		// language picker
@@ -160,8 +165,6 @@ var dictor = {
 				vars.panelsIsVisible = true;
 			}, false)
 		}
-		
-		
 		
 		document.addEventListener('keydown', function(e){
 			if(e.keyCode == 18){
@@ -247,7 +250,7 @@ var dictor = {
 		}
 	},
 	touch: {
-		picking: function(e){	// What containers to make pickable?
+		/*picking: function(e){	// What containers to make pickable?
 			var dom = dictor.dom;
 			var vars = dictor.vars;
 			var utils = dictor.utils;
@@ -293,7 +296,7 @@ var dictor = {
 				dictor.dictorize(pickedElems);
 			}
 			return false;
-		},
+		},*/
 		dictorElemTouchdown: function(e, elem){  // this could probably be a lot prettier
 			e.stopPropagation();
 			var elem = elem || this;
@@ -442,17 +445,22 @@ var dictor = {
 			}
 		},
 		scrollFix: function(elem, o){
-			var width = o.width * (window.innerWidth / 320);
-			var height = o.height * (window.innerHeight / 380);	
-			var fromTop = 0, fromLeft = 0;
-			if(o.v == 'b') { fromTop = window.innerHeight - height }
-			if(o.h == 'r') { fromLeft = window.innerWidth - width }
-	
-			elem.style.top = (window.pageYOffset + fromTop - 30) + 'px';
-			elem.style.left = ( window.pageXOffset + fromLeft - 30) + 'px';
-			elem.style.width = width + 'px'; 
-			elem.style.height = height + 'px';
-			elem.style.fontSize = (height * 0.33) + 'px';
+			if(dictor.vars.iphone){
+				var width = o.width * (window.innerWidth / 320);
+				var height = o.height * (window.innerHeight / 380);	
+				var fromTop = 0, fromLeft = 0;
+				if(o.v == 'b') { fromTop = window.innerHeight - height }
+				if(o.h == 'r') { fromLeft = window.innerWidth - width }
+				console.log(width, height);
+				console.log(fromTop, fromLeft);
+				console.log(window.pageYOffset, window.pageXOffset);
+				
+				elem.style.top = (window.pageYOffset + fromTop - 30) + 'px';
+				elem.style.left = ( window.pageXOffset + fromLeft - 30) + 'px';
+				elem.style.width = width + 'px'; 
+				elem.style.height = height + 'px';
+				elem.style.fontSize = (height * 0.33) + 'px';
+			}
 		},
 		addClass: function(elem, newClass){
 			elem.className = (elem.className == "" ? "" : elem.className + " ") + newClass;
