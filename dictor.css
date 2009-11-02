@@ -44,11 +44,14 @@ to {
 }
 
 .dictorTransc {
-    background: #22aaff; /* should be semi-transparent! */
+    background: rgba(115, 200, 255, 0.94); /* should be semi-transparent! */
+	border: 2px solid rgba(34, 170, 255, 1);
     -webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
     padding: 8px;
 	position: absolute;
     display: none;
+	/*text-shadow: 1px 1px 1px #fff;*/
 }
 
 .tapSwitch {

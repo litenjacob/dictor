@@ -35,7 +35,7 @@ var dictor = {
 		width: null, 
 		rs: null, 
 		rr: null, 
-		toLangCode: (window['dictorOpts'] != undefined ? dictorOpts.lang : null) || 'en', 
+		toLangCode: (window['dictorOpts'] != undefined ? dictorOpts.lang : null) || (window['navigator'] != undefined && navigator['language'] ? navigator.language.substring(0,2) : 'en'), 
 		timer: null, 
 		panelsIsVisible: true, 
 		fixes: false,
@@ -57,7 +57,7 @@ var dictor = {
 		dom.head = document.getElementsByTagName('head')[0];
 	
 		// link in css
-		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css'}, append: dom.head});
+		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://localhost/apps/dictor/dictor.css'}, append: dom.head});
 		
 		// helper method
 		Array.prototype.map = function(fn){
@@ -214,7 +214,6 @@ var dictor = {
 		getTranslation: function(tString){
 			var utils = dictor.utils;
 			var vars = dictor.vars;
-			
 			// Positioning row		
 			var i = 0, oldY;
 			do {
@@ -498,14 +497,14 @@ var dictor = {
 			
 			// Remove any old script tags.  // Courtsey of Neil Fraser
 			var script;
-			while (script = document.getElementById('JSONP')) {
+			/*while (script = document.getElementById('JSONP')) {
 				script.parentNode.removeChild(script);
 			    // Browsers won't garbage collect this object.
 			    // So castrate it to avoid a major memory leak.
 			    for (var prop in script) {
 			    	delete script[prop];
 			    }
-			}
+			}*/
 		}
 	}
 }
