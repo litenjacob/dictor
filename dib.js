@@ -119,7 +119,7 @@ var dictor = {
 				}
 			},
 			{className: 'tapLang tappables', append: dom.dictorContainer, events: {
-					touchstart: function(e){ e.preventDefault(); e.stopPropagation(); } // preventer
+					touchstart: function(e){ e.stopPropagation(); } // preventer
 				}}	
 		].map(utils.createDictorElem);
 		
@@ -130,6 +130,7 @@ var dictor = {
 		var toLangLabel = document.getElementById('toLang');
 		langSelect.addEventListener('change', function(){
 			toLangLabel.textContent = toLangCode = this.value;
+			dictor.utils.scrollFix(dom.dictorContainer, {v: 'b', h: 'r', width: 300, height: 45});
 		}, false);
 		
 		// find my lang - not pretty - use something else. xPath?
@@ -142,6 +143,7 @@ var dictor = {
 		
 		document.addEventListener(dictor.eventBridge.touchmove, function(e){
 			if(vars.dragging){
+				e.preventDefault();
 				var e = e['touches'] ? e.touches[0] : e;
 				dictor.dom.transc.style.top = (e.pageY + vars.offset.y) + 'px';
 				dictor.dom.transc.style.left = (e.pageX + vars.offset.x) + 'px';
@@ -151,7 +153,7 @@ var dictor = {
 		if(vars.iphone){
 			// touchmove hides panels
 			document.addEventListener(dictor.eventBridge.touchmove, function(e){
-				if (vars.panelsIsVisible) {
+				if (vars.panelsIsVisible && !vars.dragging) {
 					utils.addClass(dom.body, 'dictorHide');
 					vars.panelsIsVisible = false;
 				}
@@ -445,14 +447,14 @@ var dictor = {
 			
 			// Remove any old script tags.  // Courtsey of Neil Fraser
 			var script;
-			/*while (script = document.getElementById('JSONP')) {
+			while (script = document.getElementById('JSONP')) {
 				script.parentNode.removeChild(script);
 			    // Browsers won't garbage collect this object.
 			    // So castrate it to avoid a major memory leak.
 			    for (var prop in script) {
 			    	delete script[prop];
 			    }
-			}*/
+			}
 		}
 	}
 }
@@ -470,15 +472,22 @@ dictor.init();
 	var point = {};
 	document.getElementsByTagName('body')[0].addEventListener('ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown', function(e){
 		var eTarget = e.srcElement || e.originalTarget;
+		if(eTarget.nodeType == 3){
+			eTarget = eTarget.parentNode;
+		}
 		if(eTarget.className.indexOf('dictor') != -1){ return false; }
 		if(window['dictor'] != undefined && dictor.vars.translated.length){
 			dictor.translation.removeTranslation();
 		}
+		
+		var ep = e['touches'] ? e.touches[0] : e;
 		if(eTarget == elem && new Date().getTime() - time < 500){
 			function sendToDictor(elem, point, e){
 				dictor.dictorize([elem]);
+				
 				var firstElem = document.elementFromPoint(point.x, point.y);
-				var secondElem = document.elementFromPoint(e[relativeWhat.x], e[relativeWhat.y]);
+				var secondElem = document.elementFromPoint(ep[relativeWhat.x], ep[relativeWhat.y]);
+				
 				if(firstElem == secondElem){
 					dictor.touch.dictorElemTouchdown(e, firstElem);
 					dictor.touch.dictorElemTouchdown(e, secondElem);
@@ -506,14 +515,11 @@ dictor.init();
 		}
 		elem = eTarget;
 		time = new Date().getTime();
-		point.x = e[relativeWhat.x];
-		point.y = e[relativeWhat.y];
+		point.x = ep[relativeWhat.x];
+		point.y = ep[relativeWhat.y];
 		return false;
 	}, false)	
 })()
-
-
-
 
 
 

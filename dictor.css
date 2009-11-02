@@ -123,6 +123,7 @@ to {
     opacity: 0;
     position: absolute;
 	left: 0;
+	-webkit-appearance: none;
 }
 
 .langPicker {
