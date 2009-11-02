@@ -448,8 +448,8 @@ var dictor = {
 			if(o.v == 'b') { fromTop = window.innerHeight - height }
 			if(o.h == 'r') { fromLeft = window.innerWidth - width }
 	
-			elem.style.top = (window.pageYOffset + fromTop - 1) + 'px';
-			elem.style.left = ( window.pageXOffset + fromLeft - 1) + 'px';
+			elem.style.top = (window.pageYOffset + fromTop - 30) + 'px';
+			elem.style.left = ( window.pageXOffset + fromLeft - 30) + 'px';
 			elem.style.width = width + 'px'; 
 			elem.style.height = height + 'px';
 			elem.style.fontSize = (height * 0.33) + 'px';
