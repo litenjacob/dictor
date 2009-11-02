@@ -64,7 +64,7 @@ var dictor = {
 		dom.head = document.getElementsByTagName('head')[0];
 	
 		// link in css
-		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://localhost/apps/dictor/dictor.css'}, append: dom.head});
+		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css'}, append: dom.head});
 		
 		// helper method
 		Array.prototype.map = function(fn){
@@ -77,6 +77,7 @@ var dictor = {
 		}
 			
 		vars.oldBody = dom.body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
+		dom.pageCollection = document.getElementsByTagName("*");	
 	
 		// create link
 		dom.link = utils.createDictorElem({elemType: 'a', className: 'dictorLink'});
@@ -90,7 +91,7 @@ var dictor = {
 					var e = e['touches'] ? e.touches[0] : e;
 					vars.offset = {x: p.xs - e.pageX, y: p.ys - e.pageY};
 				},
-				touchend: function(){ vars.dragging = false; console.log('up'); }
+				touchend: function(){ vars.dragging = false; }
 			}
 		});
 		
@@ -172,10 +173,8 @@ var dictor = {
 			}
 		}, false);
 		
-		console.log('oldBodyLenght', vars.oldBody.length);
-		
 		var after = (new Date()).getTime() / 1000;
-		//console.log("Middle took " + (middle - before).toFixed(4) + " seconds");
+
 		console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
 	},
 	translation: {
@@ -229,7 +228,6 @@ var dictor = {
 		},
 		showTranslation: function(response, status, error){
 			if (status == 200) {
-				console.log(response.translatedText);
 				clearTimeout(dictor.vars.timer);
 				dictor.dom.transc.textContent = response.translatedText;
 			}
@@ -451,12 +449,9 @@ var dictor = {
 				var fromTop = 0, fromLeft = 0;
 				if(o.v == 'b') { fromTop = window.innerHeight - height }
 				if(o.h == 'r') { fromLeft = window.innerWidth - width }
-				console.log(width, height);
-				console.log(fromTop, fromLeft);
-				console.log(window.pageYOffset, window.pageXOffset);
 				
-				elem.style.top = (window.pageYOffset + fromTop - 30) + 'px';
-				elem.style.left = ( window.pageXOffset + fromLeft - 30) + 'px';
+				elem.style.top = (window.pageYOffset + fromTop - 1) + 'px';
+				elem.style.left = ( window.pageXOffset + fromLeft - 1) + 'px';
 				elem.style.width = width + 'px'; 
 				elem.style.height = height + 'px';
 				elem.style.fontSize = (height * 0.33) + 'px';
@@ -519,19 +514,58 @@ var dictor = {
 
 dictor.init();
 
-//console.log(dictor);
-/*var ps = document.getElementsByTagName('p');
-for(var i = 0; i < ps.length; i++){
-	ps[i].addEventListener(dictor.eventBridge.touchstart, function(e){
-		var elem = document.elementFromPoint(e.pageX, e.pageY);
-		console.log(elem);
-		dictor.dictorize([elem]);
-		var newElem = document.elementFromPoint(e.pageX, e.pageY);
-		console.log(newElem);
-	}, false);
-}*/
+// bootstrapper
+(function(){
 
-
+	// fix different behaviours
+	var relativeWhat = (/safari|opera/i).test(navigator.userAgent) ? { x: 'pageX', y: 'pageY' } : { x: 'clientX', y: 'clientY' };
+	
+	var elem = null;
+	var time = 0;
+	var point = {};
+	document.getElementsByTagName('body')[0].addEventListener('ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown', function(e){
+		var eTarget = e.srcElement || e.originalTarget;
+		if(eTarget.className.indexOf('dictor') != -1){ return false; }
+		if(window['dictor'] != undefined && dictor.vars.translated.length){
+			dictor.translation.removeTranslation();
+		}
+		if(eTarget == elem && new Date().getTime() - time < 500){
+			function sendToDictor(elem, point, e){
+				dictor.dictorize([elem]);
+				var firstElem = document.elementFromPoint(point.x, point.y);
+				var secondElem = document.elementFromPoint(e[relativeWhat.x], e[relativeWhat.y]);
+				if(firstElem == secondElem){
+					dictor.touch.dictorElemTouchdown(e, firstElem);
+					dictor.touch.dictorElemTouchdown(e, secondElem);
+				}
+			}
+			
+			if(window['dictor'] != undefined){
+				sendToDictor(elem, point, e);
+			} else {
+				var s=document.createElement('script');
+				s.type='text/javascript';
+				s.charset = 'utf-8';
+				s.src='http://79.99.1.153/dictor/dib.js?' + (new Date()).getTime();
+				document.getElementsByTagName("head")[0].appendChild(s);
+				s.onreadystatechange = function(){
+				    if (script.readyState == 'loaded' || script.readyState == 'complete') {
+				        sendToDictor(elem, point, e);
+				    }   
+				}
+				s.onload = function(){
+					sendToDictor(elem, point, e);
+				    return;   
+				}
+			}
+		}
+		elem = eTarget;
+		time = new Date().getTime();
+		point.x = e[relativeWhat.x];
+		point.y = e[relativeWhat.y];
+		return false;
+	}, false)	
+})()
 
 
 

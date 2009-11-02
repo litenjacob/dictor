@@ -43,9 +43,9 @@ to {
 }
 }
 
+
+
 .dictorTransc {
-    background: rgba(115, 200, 255, 0.94); /* should be semi-transparent! */
-	border: 2px solid rgba(34, 170, 255, 1);
     -webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
     padding: 8px;
@@ -80,9 +80,15 @@ to {
     -webkit-border-bottom-right-radius: 20px;
 }*/
 
+.dictorContainer, .dictorTransc {
+	background: rgb(115, 200, 255);
+    background: rgba(115, 200, 255, 0.94);
+	border: 2px solid rgb(34, 170, 255);
+	border: 2px solid rgba(34, 170, 255, 1);
+}
+
 .dictorContainer {
 	position: absolute;
-	background: #22aaff;
     -webkit-border-top-left-radius: 20px;
 	-moz-border-radius-topleft: 20px;
 	border-top-left-radius: 20px;
