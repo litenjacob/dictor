@@ -80,7 +80,7 @@ to {
     -webkit-border-bottom-right-radius: 20px;
 }*/
 
-.dictorContainer, .dictorTransc {
+.dictorContainer, .dictorTransc, .dictorLink {
 	background: rgb(115, 200, 255);
     background: rgba(115, 200, 255, 0.94);
 	border: 2px solid rgb(34, 170, 255);
@@ -106,8 +106,8 @@ to {
 }
 
 .dictorLink {
-    background: #22aaff;
-    -webkit-border-radius: 6px;
+    -webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
     color: #fff;
     padding: 4px;
     white-space: nowrap;

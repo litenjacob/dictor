@@ -77,11 +77,6 @@ var dictor = {
 		}
 			
 		vars.oldBody = dom.body.innerHTML; // this is used when exiting dictor. not pretty, but works for now
-		dom.pageCollection = document.getElementsByTagName("*");	
-	
-		// create link
-		dom.link = utils.createDictorElem({elemType: 'a', className: 'dictorLink'});
-		dom.dictorContainer = utils.createDictorElem({elemType: 'div', className: 'dictorContainer', scroll: {v: 'b', h: 'r', width: 300, height: 45}});
 	
 		// create translation container
 		dom.transc = utils.createDictorElem({className: 'dictorTransc', events: {
@@ -99,17 +94,18 @@ var dictor = {
 		var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
 			n.setAttribute('rel', n.getAttribute('href'));
 			n.setAttribute('href', '#');
-			n.addEventListener(dictor.eventBridge.touchdown, function(e){
-				return false; // to prevent link jumping - works, but is it right?
-			}, false);	
+			n.setAttribute('onclick', 'dictor.touch.link(arguments[0], this);'); // ugly truth
 		})
+		
+		// create link
+		dom.link = utils.createDictorElem({elemType: 'a', className: 'dictorLink'});
+		dom.dictorContainer = utils.createDictorElem({elemType: 'div', className: 'dictorContainer', scroll: {v: 'b', h: 'r', width: 300, height: 45}});
 		
 		dom.tappables = [
 			{className: 'tapExit tappables', content: {text: 'close'}, append: dom.dictorContainer,
 				events: {
 					touchstart: function(e){
 						console.log('should exit');
-						//dom.body.innerHTML = vars.oldBody;
 					}
 				}
 			},
@@ -144,8 +140,6 @@ var dictor = {
 			}
 		}
 		
-		// touchmove hides panels
-		
 		document.addEventListener(dictor.eventBridge.touchmove, function(e){
 			if(vars.dragging){
 				var e = e['touches'] ? e.touches[0] : e;
@@ -155,6 +149,7 @@ var dictor = {
 		}, false)
 		
 		if(vars.iphone){
+			// touchmove hides panels
 			document.addEventListener(dictor.eventBridge.touchmove, function(e){
 				if (vars.panelsIsVisible) {
 					utils.addClass(dom.body, 'dictorHide');
@@ -248,53 +243,18 @@ var dictor = {
 		}
 	},
 	touch: {
-		/*picking: function(e){	// What containers to make pickable?
-			var dom = dictor.dom;
-			var vars = dictor.vars;
-			var utils = dictor.utils;
-			
-			e.stopPropagation();
-			if (!vars.isPicking) {
-				vars.isPicking = true;
-				utils.addClass(dom.body, 'dictorPicking');
-				vars.containerTags.forEach(function(item){
-					Array.prototype.slice.call(document.getElementsByTagName(item)).forEach(function(obj){
-						if (!utils.hasClass(obj, 'dictorContainer')) { // fix all
-							utils.addClass(obj, 'dictorPickable');
-							obj.addEventListener(dictor.eventBridge.touchstart, function(e){
-								e.stopPropagation();
-								if (vars.isPicking) { // only if we're picking - should probably remove eventlistener instead
-									if (utils.hasClass(obj, 'dictorPicked')) {
-										utils.removeClass(obj, 'dictorPicked');
-									}
-									else {
-										utils.addClass(obj, 'dictorPicked');
-									}
-								}
-							}, false);
-						}
-					});
-				})
-			} else {
-				vars.isPicking = false;
-				Array.prototype.slice.call(document.getElementsByClassName('dictorPicked')).forEach(function(obj){
-					Array.prototype.slice.call(obj.childNodes).forEach(function(childObj){
-						utils.recursiveRemoveClass(childObj);
-					});
-				})
-				
-				var pickedElems = Array.prototype.slice.call(document.getElementsByClassName('dictorPicked'));
-				pickedElems.forEach(function(item){
-					utils.removeClass(item, 'dictorPicked');
-				})
-				
-				Array.prototype.slice.call(document.getElementsByClassName('dictorPickable')).forEach(function(item){
-					utils.removeClass(item, 'dictorPickable');
-				})
-				dictor.dictorize(pickedElems);
-			}
-			return false;
-		},*/
+		link: function(e, elem){
+			// if we're touching a link, show linkhelper to make it 'clickable'
+			e.preventDefault();
+			var link = dictor.dom.link;
+			var p = dictor.utils.findPos(elem);
+			link.textContent = "Goto: " + elem.textContent;
+			link.setAttribute('href', elem.getAttribute('rel'));
+			link.style.left = (p.xs - 8) + 'px';
+			link.style.top = (p.ye + 8) + 'px';
+			dictor.utils.addClass(link, 'visible');
+			link.isVisible = true;
+		},
 		dictorElemTouchdown: function(e, elem){  // this could probably be a lot prettier
 			e.stopPropagation();
 			var elem = elem || this;
@@ -352,26 +312,11 @@ var dictor = {
 					}
 				}
 			}
+		
 			
-			var link = dictor.dom.link;
-			// if we're touching a link, show linkhelper to make it 'clickable'
-			if (elem.parentNode.nodeName == 'A') {	
-				var p = utils.findPos(elem);
-				var a = elem.parentNode;
-				link.textContent = "Goto: " + a.textContent;
-				link.setAttribute('href', a.getAttribute('rel'));
-				link.style.left = (p.xs - 4) + 'px';
-				link.style.top = (p.ys - elem.offsetHeight - 4) + 'px';
-				utils.addClass(link, 'visible');
-				link.isVisible = true;
-				link.location = utils.findPos(link); //TODO: necessary?
-				e.preventDefault();
-				return false;
-			}
-			
-			if(link.isVisible){  //TODO: should this be here?
-				link.isVisible = false;
-				utils.removeClass(link, 'visible');
+			if(dictor.dom.link.isVisible){  //TODO: should this be here?
+				dictor.dom.link.isVisible = false;
+				utils.removeClass(dictor.dom.link, 'visible');
 			}
 		}
 	},
