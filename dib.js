@@ -100,7 +100,7 @@ var dictor = {
 			n.setAttribute('rel', n.getAttribute('href'));
 			n.setAttribute('href', '#');
 			n.addEventListener(dictor.eventBridge.touchdown, function(e){
-				e.preventDefault(); // to prevent link jumping - works, but is it right?
+				return false; // to prevent link jumping - works, but is it right?
 			}, false);	
 		})
 		
