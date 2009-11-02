@@ -64,7 +64,7 @@ var dictor = {
 		dom.head = document.getElementsByTagName('head')[0];
 	
 		// link in css
-		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css'}, append: dom.head});
+		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css?' + new Date().getTime() }, append: dom.head});
 		
 		// helper method
 		Array.prototype.map = function(fn){
