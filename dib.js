@@ -41,7 +41,8 @@ var dictor = {
 		fixes: false,
 		containerTags: ['DIV', 'P', 'H1', 'H2', 'H3'],
 		dragging: false,
-		offset: null	
+		offset: null,
+		iphone: navigator.userAgent.match(/iPhone|iPod/i)	
 	},
 	eventBridge: {
 		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
@@ -104,6 +105,7 @@ var dictor = {
 			{className: 'tapExit tappables', content: {text: 'close'}, append: dom.dictorContainer,
 				events: {
 					touchstart: function(e){
+						console.log('should exit');
 						//dom.body.innerHTML = vars.oldBody;
 					}
 				}
@@ -137,11 +139,8 @@ var dictor = {
 		}
 		
 		// touchmove hides panels
+		
 		document.addEventListener(dictor.eventBridge.touchmove, function(e){
-			if (vars.panelsIsVisible) {
-				utils.addClass(dom.body, 'dictorHide');
-				vars.panelsIsVisible = false;
-			}
 			if(vars.dragging){
 				var e = e['touches'] ? e.touches[0] : e;
 				dictor.dom.transc.style.top = (e.pageY + vars.offset.y) + 'px';
@@ -149,10 +148,20 @@ var dictor = {
 			}
 		}, false)
 		
-		document.addEventListener("scroll", function(){
-			utils.removeClass(dom.body, 'dictorHide');
-			vars.panelsIsVisible = true;
-		}, false)
+		if(vars.iphone){
+			document.addEventListener(dictor.eventBridge.touchmove, function(e){
+				if (vars.panelsIsVisible) {
+					utils.addClass(dom.body, 'dictorHide');
+					vars.panelsIsVisible = false;
+				}
+			})
+			document.addEventListener("scroll", function(){
+				utils.removeClass(dom.body, 'dictorHide');
+				vars.panelsIsVisible = true;
+			}, false)
+		}
+		
+		
 		
 		document.addEventListener('keydown', function(e){
 			if(e.keyCode == 18){
@@ -439,8 +448,8 @@ var dictor = {
 			if(o.v == 'b') { fromTop = window.innerHeight - height }
 			if(o.h == 'r') { fromLeft = window.innerWidth - width }
 	
-			elem.style.top = (window.pageYOffset + fromTop) + 'px';
-			elem.style.left = ( window.pageXOffset + fromLeft) + 'px';
+			elem.style.top = (window.pageYOffset + fromTop - 1) + 'px';
+			elem.style.left = ( window.pageXOffset + fromLeft - 1) + 'px';
 			elem.style.width = width + 'px'; 
 			elem.style.height = height + 'px';
 			elem.style.fontSize = (height * 0.33) + 'px';
