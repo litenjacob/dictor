@@ -4,6 +4,9 @@
 //http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en|it&callback=dictor
 //http://www.google.com/uds/samples/language/detect.html
 //http://www.google.com/uds/samples/language/branding.html
+//TODO: z-indexes!
+//TODO: text-input too
+//TODO: fix font-sizes
 
 var dictor = {
 	dom: {}, // this is filled by init
