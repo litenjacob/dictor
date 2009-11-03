@@ -35,7 +35,12 @@ var dictor = {
 		
 		var before = (new Date()).getTime() / 1000;
 		dom.body = document.getElementsByTagName('body')[0];
-		if (dom.body.className.match(/dictorized/)) { return false; } // already dictorized?
+		if (dom.body.className.match(/dictorized/)) { // already dictorized?
+			return false; 
+		} else {
+			dictor.utils.addClass(dictor.dom.body, "dictorized");
+		} 
+		
 		utils.addClass(dom.body, vars.iphone ? 'dictor-iphone' : 'dictor-desktop');
 		
 		
@@ -95,6 +100,8 @@ var dictor = {
 							var ev = dictor.vars.eventCache[i];
 							ev[0].removeEventListener(ev[1], ev[2], ev[3]);
 						}
+						utils.removeClass(dictor.dom.body, "dictorized");
+						dictor.translation.removeTranslation();
 						utils.removeElem(document.getElementById('dictor'));
 					}
 				}
@@ -314,7 +321,6 @@ var dictor = {
 		}
 	},
 	dictorize: function(arr){	// magically wraps all words in dictor spans
-		dictor.utils.addClass(dictor.dom.body, "dictorized");
 		arr.forEach(function(baseNode){
 			baseNode.innerHTML = baseNode.innerHTML.split(/[<>]/).map(function(n, i){
 				if (i % 2) {
@@ -461,7 +467,7 @@ dictor.init();
 		if(eTarget.nodeType == 3){
 			eTarget = eTarget.parentNode;
 		}
-		if(eTarget.className.indexOf('dictor') != -1){ return false; }
+		//if(eTarget.className.indexOf('dictor') != -1){ return false; } // <--- what about this?
 		if(window['dictor'] != undefined && dictor.vars.translated.length){
 			dictor.translation.removeTranslation();
 		}
