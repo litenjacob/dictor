@@ -1,3 +1,19 @@
+.dictorBranding {
+	float: left;
+	clear: left;
+	background: rgb(0, 0 , 0);
+	background: rgba(0, 0 , 0, 0.2);
+	color: #fff;
+	font-size: 0.7em;
+	padding: 0.2em;
+	width: 100%;
+}
+
+.dictorBranding img {
+	vertical-align: middle;
+}
+
+
 .dictorLink.visible, .dictorTransc.visible {
     display: block;
 }
@@ -92,6 +108,7 @@ to {
     -webkit-border-top-left-radius: 20px;
 	-moz-border-radius-topleft: 20px;
 	border-top-left-radius: 20px;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 }
 
 .dictor-desktop .dictorContainer {
@@ -143,7 +160,7 @@ to {
 
 .tappables {
 	/*width: 40px;*/
-	min-width: 40px;
+	min-width: 50px;
 	padding: 5px;
     height: 40px;
 	line-height: 40px;

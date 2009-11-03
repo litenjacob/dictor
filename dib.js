@@ -1,27 +1,9 @@
-/*
- * elementFromPoint is the shit
- * possible to only have mousedown (touchdown) listener on document and get originaltarget from it?
- * then see if doubleclick, and if so feed to dictorizer
- * also see if targetElem hasClass dictor
- * 
- * Check howto create FF plugin
- * Use rgba for background and border
- */
-
 /**
- * @author jacob
+ * @author Jacob Waller
  */
 //http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en|it&callback=dictor
 //http://www.google.com/uds/samples/language/detect.html
 //http://www.google.com/uds/samples/language/branding.html
-//http://code.google.com/intl/sv-SE/apis/ajaxlanguage/documentation/#Examples
-
-//TODO: branding!
-//TODO: set bubble offset to rowheight
-//TODO: fix panel sizes
-//TODO: fix text size
-//TODO: check body.innerHTML length and allow dictorizeAll only if machine fast enough
-
 
 var dictor = {
 	dom: {}, // this is filled by init
@@ -32,17 +14,13 @@ var dictor = {
 		translated: false, 
 		threshold: 500, 
 		multi: false, 
-		width: null, 
-		rs: null, 
-		rr: null, 
 		toLangCode: (window['dictorOpts'] != undefined ? dictorOpts.lang : null) || (window['navigator'] != undefined && navigator['language'] ? navigator.language.substring(0,2) : 'en'), 
 		timer: null, 
 		panelsIsVisible: true, 
-		fixes: false,
-		containerTags: ['DIV', 'P', 'H1', 'H2', 'H3'],
 		dragging: false,
 		offset: null,
-		iphone: navigator.userAgent.match(/iPhone|iPod/i)	
+		iphone: navigator.userAgent.match(/iPhone|iPod/i),
+		eventCache: []	
 	},
 	eventBridge: {
 		touchstart:  'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
@@ -64,7 +42,7 @@ var dictor = {
 		dom.head = document.getElementsByTagName('head')[0];
 	
 		// link in css
-		utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css?' + new Date().getTime() }, append: dom.head});
+		dom.css = utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css?' + new Date().getTime() }, append: dom.head});
 		
 		// helper method
 		Array.prototype.map = function(fn){
@@ -104,8 +82,20 @@ var dictor = {
 		dom.tappables = [
 			{className: 'tapExit tappables', content: {text: 'close'}, append: dom.dictorContainer,
 				events: {
-					touchstart: function(e){
-						console.log('should exit');
+					touchend: function(e){
+						utils.removeElem(dictor.dom.css);
+						utils.removeElem(dom.transc);
+						utils.removeElem(dom.link);
+						utils.removeElem(dom.dictorContainer);
+						var as = Array.prototype.slice.call(document.getElementsByTagName('a')).map(function(n){
+							n.setAttribute('href', n.getAttribute('rel'));
+							n.setAttribute('onclick', ''); // ugly truth
+						})
+						for(var i = 0; i < dictor.vars.eventCache.length; i++){
+							var ev = dictor.vars.eventCache[i];
+							ev[0].removeEventListener(ev[1], ev[2], ev[3]);
+						}
+						utils.removeElem(document.getElementById('dictor'));
 					}
 				}
 			},
@@ -123,12 +113,15 @@ var dictor = {
 				}}	
 		].map(utils.createDictorElem);
 		
+		// branding
+		utils.createDictorElem({elemType: 'span', className: 'dictorBranding', content: { html: "translations by: <img src='http://www.google.com/uds/css/small-logo.png' alt='google-logo'/>" }, append: dom.dictorContainer});
+		
 		// language picker
 		var langs = '<select id="langSelect"><option value="ar">العربية</option><option value="bg">български</option><option value="ca">català</option><option value="cs">česky</option><option value="da">Dansk</option><option value="de">Deutsch</option><option value="el">Ελληνικά</option><option value="en">English</option><option value="es">Español</option><option value="fi">suomi</option><option value="fr">Français</option><option value="hi">हिन्दी</option><option value="hr">hrvatski</option><option value="id">Indonesia</option><option value="it">Italiano</option><option value="iw">עברית</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="lt">Lietuvių</option><option value="lv">latviešu</option><option value="nl">Nederlands</option><option value="no">norsk</option><option value="pl">Polski</option><option value="pt">Português</option><option value="ro">Română</option><option value="ru">Русский</option><option value="sk">slovenčina</option><option value="sl">slovenščina</option><option value="sr">српски</option><option value="sv">svenska</option><option value="tl">Filipino</option><option value="uk">українська</option><option value="vi">Tiếng Việt</option><option id="opsvzh-CN" value="zh-CN">中文 (简体)</option><option id="opsvzh-TW" value="zh-TW">中文 (繁體)</option></select>';
 		dom.tappables[2].innerHTML = '<div id="toLangContainer" class="langPicker"><span id="toLang" class="langShow">sv</span>' + langs + '</div>';
 		var langSelect = document.getElementById('langSelect');
 		var toLangLabel = document.getElementById('toLang');
-		langSelect.addEventListener('change', function(){
+		dictor.utils.addEventListener(langSelect, 'change', function(){
 			toLangLabel.textContent = toLangCode = this.value;
 			dictor.utils.scrollFix(dom.dictorContainer, {v: 'b', h: 'r', width: 300, height: 45});
 		}, false);
@@ -141,7 +134,7 @@ var dictor = {
 			}
 		}
 		
-		document.addEventListener(dictor.eventBridge.touchmove, function(e){
+		dictor.utils.addEventListener(document, dictor.eventBridge.touchmove, function(e){
 			if(vars.dragging){
 				e.preventDefault();
 				var e = e['touches'] ? e.touches[0] : e;
@@ -152,27 +145,25 @@ var dictor = {
 		
 		if(vars.iphone){
 			// touchmove hides panels
-			document.addEventListener(dictor.eventBridge.touchmove, function(e){
+			dictor.utils.addEventListener(document, dictor.eventBridge.touchmove, function(e){
 				if (vars.panelsIsVisible && !vars.dragging) {
 					utils.addClass(dom.body, 'dictorHide');
 					vars.panelsIsVisible = false;
 				}
 			})
-			document.addEventListener("scroll", function(){
+			dictor.utils.addEventListener(document, "scroll", function(){
 				utils.removeClass(dom.body, 'dictorHide');
 				vars.panelsIsVisible = true;
 			}, false)
 		}
 		
-		document.addEventListener('keydown', function(e){
+		dictor.utils.addEventListener(document, 'keydown', function(e){
 			if(e.keyCode == 18){
+				console.log('hap');
 				dictor.translation.changeMode();
 			}
 		}, false);
 		
-		var after = (new Date()).getTime() / 1000;
-
-		console.log("Dictorizing took " + (after - before).toFixed(4) + " seconds");
 	},
 	translation: {
 		getWords: function(e){
@@ -339,12 +330,16 @@ var dictor = {
 		var touchdownFunc = dictor.touch.dictorElemTouchdown;
 		// get all spans into variable and bind touchevents - this doesn't seem to be slower than binding using ontouchstart or even adding the ontouchstart on tag creation :) 
 		dictor.dom.spans = Array.prototype.slice.call(document.getElementsByClassName('dictor')).map(function(n){
-			n.addEventListener(touchdownEvent, touchdownFunc, false);
+			dictor.utils.addEventListener(n, touchdownEvent, touchdownFunc, false);
 			return n;
 		});
 	
 	},
 	utils: {
+		addEventListener: function(node, event, func, type){
+			node.addEventListener(event, func, type);
+			dictor.vars.eventCache.push(arguments);
+		},
 		createDictorElem: function(opts){
 			var elem = document.createElement(opts.elemType || 'div');
 			elem.className = opts.className || '';
@@ -358,14 +353,14 @@ var dictor = {
 				opts.append.appendChild(elem);
 			}
 			if(opts.scroll){
-				document.addEventListener("scroll", function(){
+				dictor.utils.addEventListener(document, "scroll", function(){
 					dictor.utils.scrollFix(elem, opts.scroll); 
 				}, false);
 				dictor.utils.scrollFix(elem, opts.scroll); // Prime-time
 			}
 			if(opts.events){
 				for(var event in opts.events){
-					elem.addEventListener(dictor.eventBridge[event] || event, opts.events[event], false);
+					dictor.utils.addEventListener(elem, dictor.eventBridge[event] || event, opts.events[event], false);
 				}
 			}
 			if(opts.content){
@@ -376,18 +371,6 @@ var dictor = {
 				}
 			}
 			return elem;
-		},
-		recursiveRemoveClass: function(obj){
-			if (obj.childNodes.length) {
-				Array.prototype.slice.call(obj.childNodes).forEach(function(childObj){
-					if (childObj.nodeType != 3 && childObj.childNodes.length) {
-						dictor.utils.recursiveRemoveClass(childObj);
-					}
-					if (dictor.vars.containerTags.indexOf(obj.nodeName) != -1) {
-						dictor.utils.removeClass(obj, 'dictorPicked');
-					}
-				})
-			}
 		},
 		scrollFix: function(elem, o){
 			if(dictor.vars.iphone){
@@ -429,6 +412,9 @@ var dictor = {
 				xe: curleft + origObj.offsetWidth,
 				ye: curtop + origObj.offsetHeight
 		    }; 
+		},
+		removeElem: function(elem){
+			elem.parentNode.removeChild(elem);
 		}
 	},
 	net: {
@@ -501,6 +487,7 @@ dictor.init();
 				s.type='text/javascript';
 				s.charset = 'utf-8';
 				s.src='http://79.99.1.153/dictor/dib.js?' + (new Date()).getTime();
+				s.id='dictor';
 				document.getElementsByTagName("head")[0].appendChild(s);
 				s.onreadystatechange = function(){
 				    if (script.readyState == 'loaded' || script.readyState == 'complete') {
