@@ -9,6 +9,7 @@
 //TODO: z-indexes!
 //TODO: text-input too
 //TODO: fix font-sizes
+//TODO: we never want to hijack links containing only numbers
 
 var dictor = {
 	dom: {}, // this is filled by init
@@ -180,9 +181,7 @@ var dictor = {
 		
 	},
 	translation: {
-		getWords: function(e){
-			console.log(dictor.vars.from, dictor.vars.to);
-			
+		getWords: function(e){			
 			var vars = dictor.vars;
 			var dom = dictor.dom;
 			var utils = dictor.utils;
