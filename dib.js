@@ -10,6 +10,8 @@
 //TODO: text-input too
 //TODO: fix font-sizes
 //TODO: we never want to hijack links containing only numbers
+//TODO: fix multipicker color and check integrity of node
+//TODO: fix first node offset
 
 var dictor = {
 	dom: {}, // this is filled by init
