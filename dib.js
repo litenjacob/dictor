@@ -146,7 +146,7 @@ var dictor = {
 		}
 		
 		dictor.utils.addEventListener(document, dictor.eventBridge.touchmove, function(e){
-			if(vars.dragging){
+			if(vars.dragging){			
 				e.preventDefault();
 				var e = e['touches'] ? e.touches[0] : e;
 				dictor.dom.transc.style.top = (e.pageY + vars.offset.y) + 'px';
@@ -170,7 +170,6 @@ var dictor = {
 		
 		dictor.utils.addEventListener(document, 'keydown', function(e){
 			if(e.keyCode == 18){
-				console.log('hap');
 				dictor.translation.changeMode();
 			}
 		}, false);
@@ -462,7 +461,7 @@ var dictor = {
 dictor.init();
 
 // bootstrapper
-(function(){
+/*(function(){
 
 	// fix different behaviours
 	var relativeWhat = (/safari|opera/i).test(navigator.userAgent) ? { x: 'pageX', y: 'pageY' } : { x: 'clientX', y: 'clientY' };
@@ -520,7 +519,7 @@ dictor.init();
 		point.y = ep[relativeWhat.y];
 		return false;
 	}, false)	
-})()
+})()*/
 
 
 
