@@ -28,10 +28,11 @@
 			if (eTarget.nodeType == 3) {
 				eTarget = eTarget.parentNode;
 			}
-			//if(eTarget.className.indexOf('dictor') != -1){ return false; } // <--- what about this?
-			/*if(unsafeWindow['dictor'] != undefined && unsafeWindow.dictor.vars.translated.length){
-		 unsafeWindow.dictor.translation.removeTranslation();
-		 }*/
+			if (eTarget.className.indexOf('dictor') == -1) { // <--- what about this?
+				if (unsafeWindow['dictor'] != undefined && unsafeWindow.dictor.vars.translated.length) {
+					unsafeWindow.dictor.translation.removeTranslation();
+				}
+			}
 			var ep = e['touches'] ? e.touches[0] : e;
 			if (eTarget == elem && new Date().getTime() - time < 500) {
 				function sendToDictor(elem, point, e){
