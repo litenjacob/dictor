@@ -181,6 +181,8 @@ var dictor = {
 	},
 	translation: {
 		getWords: function(e){
+			console.log(dictor.vars.from, dictor.vars.to);
+			
 			var vars = dictor.vars;
 			var dom = dictor.dom;
 			var utils = dictor.utils;
@@ -199,7 +201,9 @@ var dictor = {
 			tString = vars.translated.slice(0).map(function(n){ utils.addClass(n, "dictorActive"); return n.textContent }).join(" ");
 			
 			vars.from = vars.to = false;
-			dictor.translation.getTranslation(tString);
+			if(vars.translated.length){ // did we get anything?
+				dictor.translation.getTranslation(tString);
+			}
 		},
 		showLoader: function(rs, rr){
 			var transc = dictor.dom.transc;
