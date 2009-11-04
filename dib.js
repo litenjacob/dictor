@@ -1,6 +1,8 @@
 /**
  * @author Jacob Waller
  */
+
+
 //http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en|it&callback=dictor
 //http://www.google.com/uds/samples/language/detect.html
 //http://www.google.com/uds/samples/language/branding.html
@@ -71,8 +73,7 @@ var dictor = {
 					var p =  utils.findPos(this);
 					var e = e['touches'] ? e.touches[0] : e;
 					vars.offset = {x: p.xs - e.pageX, y: p.ys - e.pageY};
-				},
-				touchend: function(){ vars.dragging = false; }
+				}
 			}
 		});
 		
@@ -160,7 +161,7 @@ var dictor = {
 					utils.addClass(dom.body, 'dictorHide');
 					vars.panelsIsVisible = false;
 				}
-			})
+			}, false)
 			dictor.utils.addEventListener(document, "scroll", function(){
 				utils.removeClass(dom.body, 'dictorHide');
 				vars.panelsIsVisible = true;
@@ -173,6 +174,10 @@ var dictor = {
 				dictor.translation.changeMode();
 			}
 		}, false);
+
+		dictor.utils.addEventListener(document, dictor.eventBridge.touchend, function(e){
+			dictor.vars.dragging = false;
+		}, false)
 		
 	},
 	translation: {
