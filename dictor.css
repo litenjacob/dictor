@@ -67,6 +67,7 @@ to {
 	-moz-border-radius: 8px;
     padding: 8px;
 	position: absolute;
+	z-index: 1337;
     display: none;
 	/*text-shadow: 1px 1px 1px #fff;*/
 }
