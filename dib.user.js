@@ -24,10 +24,13 @@
 		document.getElementsByTagName('body')[0].addEventListener('ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown', function(e){
 			if(e.button != 0){ return; }
 			
-			var eTarget = e.srcElement || e.originalTarget;
-			if (eTarget.nodeType == 3) {
-				eTarget = eTarget.parentNode;
-			}
+			try {
+				var eTarget = e.srcElement || e.originalTarget;
+				if (eTarget.nodeType == 3) {
+					eTarget = eTarget.parentNode;
+				}
+			} catch(e){}
+			if(!eTarget){ return; }
 			if (eTarget.className.indexOf('dictor') == -1) { // <--- what about this?
 				if (unsafeWindow['dictor'] != undefined && unsafeWindow.dictor.vars.translated.length) {
 					unsafeWindow.dictor.translation.removeTranslation();

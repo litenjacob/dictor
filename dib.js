@@ -466,7 +466,7 @@ var dictor = {
 dictor.init();
 
 // bootstrapper
-/*(function(){
+(function(){
 
 	// fix different behaviours
 	var relativeWhat = (/safari|opera/i).test(navigator.userAgent) ? { x: 'pageX', y: 'pageY' } : { x: 'clientX', y: 'clientY' };
@@ -524,7 +524,7 @@ dictor.init();
 		point.y = ep[relativeWhat.y];
 		return false;
 	}, false)	
-})()*/
+})();
 
 
 
