@@ -106,6 +106,7 @@ to {
 
 .dictorContainer {
 	position: absolute;
+	z-index: 1234;
     -webkit-border-top-left-radius: 20px;
 	-moz-border-radius-topleft: 20px;
 	border-top-left-radius: 20px;
