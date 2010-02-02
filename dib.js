@@ -155,7 +155,6 @@ var dictor = {
 				var e = e['changedTouches'] ? e.changedTouches[0] : e;
 				dictor.dom.transc.style.top = (e.pageY - vars.offset.y) + 'px';
 				dictor.dom.transc.style.left = (e.pageX - vars.offset.x) + 'px';
-			     console.log({xs: e.pageX, ys: e.pageY }, vars.offset);
 			}
 		}, false)
 		
