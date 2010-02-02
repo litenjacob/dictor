@@ -208,13 +208,18 @@ var dictor = {
 		},
 		showLoader: function(rs, rr){
 			var transc = dictor.dom.transc;
+			var container = dictor.vars.translated[0];
+			container.style.position = 'relative';
+			container.appendChild(transc);
+			
+			console.log(dictor.vars.translated[0]);
 			transc.innerHTML = '<img src="http://79.99.1.153/dictor/pics/ajax-loader.gif" alt="loader"/>';
 			dictor.utils.addClass(transc, 'visible');
 			dictor.vars.timer = setTimeout(function(){
 				transc.textContent = 'error';
 			}, 12000);
-			transc.style.left = (rs - 8) + 'px';
-			transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
+			//transc.style.left = (rs - 8) + 'px';
+			//transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
 		},
 		getTranslation: function(tString){
 			var utils = dictor.utils;
@@ -237,6 +242,7 @@ var dictor = {
 			if (status == 200) {
 				clearTimeout(dictor.vars.timer);
 				dictor.dom.transc.textContent = response.translatedText;
+				dictor.dom.transc.style.position = 'absolute';
 			}
 		},
 		removeTranslation: function(){
