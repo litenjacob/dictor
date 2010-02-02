@@ -73,9 +73,10 @@ var dictor = {
 		dom.transc = utils.createDictorElem({className: 'dictorTransc', events: {
 				touchstart: function(e){ 
 					vars.dragging = true;
-					var p =  utils.findPos(this);
-					var e = e['touches'] ? e.touches[0] : e;
-					vars.offset = {x: p.xs - e.pageX, y: p.ys - e.pageY};
+					var pos =  utils.findPos(this);
+					var e = e['changedTouches'] ? e.changedTouches[0] : e;
+					var parentPos = dictor.utils.findPos(e.target.parentNode);
+					vars.offset = { x: e.pageX - pos.xs + parentPos.xs, y: e.pageY - pos.ys + parentPos.ys };
 				}
 			}
 		});
@@ -151,9 +152,10 @@ var dictor = {
 		dictor.utils.addEventListener(document, dictor.eventBridge.touchmove, function(e){
 			if(vars.dragging){			
 				e.preventDefault();
-				var e = e['touches'] ? e.touches[0] : e;
-				dictor.dom.transc.style.top = (e.pageY + vars.offset.y) + 'px';
-				dictor.dom.transc.style.left = (e.pageX + vars.offset.x) + 'px';
+				var e = e['changedTouches'] ? e.changedTouches[0] : e;
+				dictor.dom.transc.style.top = (e.pageY - vars.offset.y) + 'px';
+				dictor.dom.transc.style.left = (e.pageX - vars.offset.x) + 'px';
+			     console.log({xs: e.pageX, ys: e.pageY }, vars.offset);
 			}
 		}, false)
 		
@@ -212,12 +214,16 @@ var dictor = {
 			container.style.position = 'relative';
 			container.appendChild(transc);
 			
-			console.log(dictor.vars.translated[0]);
 			transc.innerHTML = '<img src="http://79.99.1.153/dictor/pics/ajax-loader.gif" alt="loader"/>';
+			
 			dictor.utils.addClass(transc, 'visible');
 			dictor.vars.timer = setTimeout(function(){
 				transc.textContent = 'error';
 			}, 12000);
+			transc.style.top = (-transc.offsetHeight - 8) + 'px';
+			transc.style.left = 0;
+			transc.style.minWidth = 0;
+			//transc.style.left = (-transc.offsetWidth / 2) + 'px';
 			//transc.style.left = (rs - 8) + 'px';
 			//transc.style.top = (rr.ys - transc.offsetHeight - 8) + 'px';
 		},
@@ -225,24 +231,26 @@ var dictor = {
 			var utils = dictor.utils;
 			var vars = dictor.vars;
 			// Positioning row		
-			var i = 0, oldY;
+			var i = 0, wordPos;
 			do {
-				oldY = utils.findPos(vars.translated[i]).ys;
+				wordPos = utils.findPos(vars.translated[i]);
 				i++;
-			} while(vars.translated[i] && utils.findPos(vars.translated[i]).ys == oldY);
+			} while(vars.translated[i] && utils.findPos(vars.translated[i]).ys == wordPos.ys);
 			
-			rr = utils.findPos(vars.translated[0])
-			rs = rr.xs;
-			var re = utils.findPos(vars.translated[--i]).xe;
+            vars.tWidth = wordPos.xe - utils.findPos(vars.translated[0]).xs;
 			
-			dictor.translation.showLoader(rs, rr);
+			dictor.translation.showLoader();
 			dictor.net.jsonpCall('http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&langpair=|' + dictor.vars.toLangCode + '&context=showTranslation&callback=dictor.net.jsonpExec&q=' + escape(tString));
 		},
 		showTranslation: function(response, status, error){
 			if (status == 200) {
 				clearTimeout(dictor.vars.timer);
-				dictor.dom.transc.textContent = response.translatedText;
-				dictor.dom.transc.style.position = 'absolute';
+				var transc = dictor.dom.transc;
+				transc.textContent = response.translatedText;
+                //transc.style.left = (-transc.offsetWidth / 2) + 'px';
+				transc.style.minWidth = dictor.vars.tWidth + 'px';
+				transc.style.top = (-transc.offsetHeight - 8) + 'px';
+				//dictor.dom.transc.style.position = 'absolute';
 			}
 		},
 		removeTranslation: function(){
@@ -425,8 +433,8 @@ var dictor = {
 		    var curleft = curtop = 0;
 		    if (obj.offsetParent) {
 		        do {
-		            curleft += obj.offsetLeft;
-		            curtop += obj.offsetTop;
+		            curleft += obj.offsetLeft - obj.scrollLeft;
+		            curtop += obj.offsetTop - obj.scrollTop;
 		        }
 		        while (obj = obj.offsetParent);
 		    }
