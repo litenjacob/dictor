@@ -57,7 +57,7 @@ var dictor = {
 		// link in css
 		dom.css = utils.createDictorElem({elemType: 'link', attrs: {type: 'text/css', rel: 'stylesheet', href: 'http://79.99.1.153/dictor/dictor.css?' + new Date().getTime() }, append: dom.head});
 		
-		// helper method
+		// helper method - TODO: should only overwrite if not present
 		Array.prototype.map = function(fn){
 		    var arr = this, i = 0;
 		    this.forEach(function(n){
@@ -136,7 +136,7 @@ var dictor = {
 		var langSelect = document.getElementById('langSelect');
 		var toLangLabel = document.getElementById('toLang');
 		dictor.utils.addEventListener(langSelect, 'change', function(){
-			toLangLabel.textContent = toLangCode = this.value;
+			toLangLabel.textContent = vars.toLangCode = this.value;
 			dictor.utils.scrollFix(dom.dictorContainer, {v: 'b', h: 'r', width: 300, height: 45});
 		}, false);
 		
